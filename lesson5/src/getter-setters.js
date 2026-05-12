@@ -8,24 +8,18 @@ export const person = {
         building: 22
     },
 
-    // Гетери
     get fullName() {
         return `${this._firstName} ${this._lastName}`;
     },
 
-    get age() {
-        return this._age;
-    },
-
-    get address() {
-        return `${this._address.city}, ${this._address.street}, ${this._address.building}`;
-    },
-
-    // Сетери
     set fullName(name) {
         const [first, ...last] = name.trim().split(' ');
         if (first) this._firstName = first;
         if (last.length > 0) this._lastName = last.join(' ');
+    },
+
+    get age() {
+        return this._age;
     },
 
     set age(newAge) {
@@ -36,6 +30,10 @@ export const person = {
         }
     },
 
+    get address() {
+        return `${this._address.city}, ${this._address.street}, ${this._address.building}`;
+    },
+
     set city(newCity) {
         if (typeof newCity === 'string' && newCity.length > 1) {
             this._address.city = newCity;
@@ -44,12 +42,10 @@ export const person = {
 
     // Метод summary
     summary() {
-        return `
-Особиста інформація:
-Ім'я: ${this.fullName}
-Вік: ${this.age} років
-Адреса: ${this.address}
-        `.trim();
+        return 'Особиста інформація:\n' +
+            `Ім'я: ${this.fullName}\n` +
+            `Вік: ${this.age} років\n` +
+            `Адреса: ${this.address}`;
     },
 
     celebrateBirthday() {

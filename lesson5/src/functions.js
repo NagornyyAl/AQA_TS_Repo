@@ -1,31 +1,25 @@
 // functions.js
 
-export function sumNumbers(arr) {
+function processArray(arr, itemType, initialValue) {
     if (!Array.isArray(arr) || arr.length === 0) {
-        return 0;
+        return initialValue;
     }
 
-    let sum = 0;
-    for (let i = 0; i < arr.length; i++) {
-        if (typeof arr[i] === 'number') {
-            sum = sum + arr[i];
-        }
-    }
-    return sum;
-}
-
-export function concatStrings(arr) {
-    if (!Array.isArray(arr) || arr.length === 0) {
-        return '';
-    }
-
-    let result = '';
-    for (let i = 0; i < arr.length; i++) {
-        if (typeof arr[i] === 'string') {
-            result = result + arr[i];
+    let result = initialValue;
+    for (const item of arr) {
+        if (typeof item === itemType) {
+            result += item;
         }
     }
     return result;
+}
+
+export function sumNumbers(arr) {
+    return processArray(arr, 'number', 0);
+}
+
+export function concatStrings(arr) {
+    return processArray(arr, 'string', '');
 }
 
 // Функція для обробки обох типів

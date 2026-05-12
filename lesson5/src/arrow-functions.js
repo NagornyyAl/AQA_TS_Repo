@@ -1,31 +1,25 @@
 // arrow-functions.js
 
-export const sumNumbersArrow = (arr) => {
+const processArrayArrow = (arr, itemType, initialValue) => {
     if (!Array.isArray(arr) || arr.length === 0) {
-        return 0;
+        return initialValue;
     }
 
-    let sum = 0;
-    for (let i = 0; i < arr.length; i++) {
-        if (typeof arr[i] === 'number') {
-            sum = sum + arr[i];
-        }
-    }
-    return sum;
-};
-
-export const concatStringsArrow = (arr) => {
-    if (!Array.isArray(arr) || arr.length === 0) {
-        return '';
-    }
-
-    let result = '';
-    for (let i = 0; i < arr.length; i++) {
-        if (typeof arr[i] === 'string') {
-            result = result + arr[i];
+    let result = initialValue;
+    for (const item of arr) {
+        if (typeof item === itemType) {
+            result += item;
         }
     }
     return result;
+};
+
+export const sumNumbersArrow = (arr) => {
+    return processArrayArrow(arr, 'number', 0);
+};
+
+export const concatStringsArrow = (arr) => {
+    return processArrayArrow(arr, 'string', '');
 };
 
 export const processBothArrow = (numbers, strings) => {
