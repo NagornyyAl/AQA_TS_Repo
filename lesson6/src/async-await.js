@@ -1,4 +1,4 @@
-const todosUrl = 'https://jsonplaceholder.typicode.com/todos';
+const todosUrl = 'https://jsonplaceholder.typicode.com/todos?_limit=3';
 
 export async function fetchTodosWithAsyncAwait() {
     const response = await fetch(todosUrl);

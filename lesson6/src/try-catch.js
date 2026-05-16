@@ -1,5 +1,5 @@
 const unavailableResourceUrl = 'https://jsonplaceholder.typicode.com/not-existing-service';
-const availableResourceUrl = 'https://jsonplaceholder.typicode.com/todos';
+const availableResourceUrl = 'https://jsonplaceholder.typicode.com/todos?_limit=4';
 
 export class FallbackRequestError extends Error {
     constructor(status) {

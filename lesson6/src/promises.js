@@ -1,4 +1,4 @@
-const todosUrl = 'https://jsonplaceholder.typicode.com/todos';
+const todosUrl = 'https://jsonplaceholder.typicode.com/todos?_limit=5';
 
 export function fetchTodosWithPromises() {
     return fetch(todosUrl)
