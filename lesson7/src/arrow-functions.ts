@@ -1,49 +1,27 @@
-type ProcessableItemType = 'number' | 'string';
+export const sumNumbersArrow = (numbers: number[]): number => {
+    let sum = 0;
 
-interface ProcessArrayArrow {
-    (arr: unknown, itemType: 'number', initialValue: number): number;
-    (arr: unknown, itemType: 'string', initialValue: string): string;
-}
-
-const processArrayArrow = ((arr: unknown, itemType: ProcessableItemType, initialValue: number | string): number | string => {
-    if (!Array.isArray(arr) || arr.length === 0) {
-        return initialValue;
+    for (const number of numbers) {
+        sum += number;
     }
 
-    if (itemType === 'number') {
-        let result = initialValue as number;
+    return sum;
+};
 
-        for (const item of arr) {
-            if (typeof item === 'number') {
-                result += item;
-            }
-        }
+export const concatStringsArrow = (strings: string[]): string => {
+    let result = '';
 
-        return result;
-    }
-
-    let result = initialValue as string;
-
-    for (const item of arr) {
-        if (typeof item === 'string') {
-            result += item;
-        }
+    for (const text of strings) {
+        result += text;
     }
 
     return result;
-}) as ProcessArrayArrow;
-
-export const sumNumbersArrow = (arr: unknown): number => {
-    return processArrayArrow(arr, 'number', 0);
 };
 
-export const concatStringsArrow = (arr: unknown): string => {
-    return processArrayArrow(arr, 'string', '');
-};
-
-export const processBothArrow = (numbers: unknown, strings: unknown): string => {
+export const processBothArrow = (numbers: number[], strings: string[]): string => {
     const sum = sumNumbersArrow(numbers);
     const text = concatStringsArrow(strings);
 
+    // Повертаємо суму чисел і склеєний текст одним рядком.
     return sum + ' ' + text;
 };

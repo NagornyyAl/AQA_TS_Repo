@@ -1,343 +1,171 @@
 # Lesson 7: TypeScript Functions
 
-Цей проєкт показує, як звичайний JavaScript-код можна переписати на TypeScript.
-Головна ідея: TypeScript допомагає заздалегідь описати, які дані функція приймає і що вона повертає.
+Проєкт показує, як переписати прості JavaScript-функції на TypeScript.
+У TypeScript ми явно вказуємо, які дані функція приймає і який результат повертає.
 
 ## Як запустити
 
-У терміналі з папки `lesson7` виконай:
+З папки `lesson7` виконай:
 
 ```powershell
 npx tsx .\src\index.ts
 ```
 
-Команда запускає файл `src/index.ts`. Саме він є головною точкою входу в програму.
+Ця команда запускає файл `src/index.ts`.
 
-## Що знаходиться в папці `src`
+## Що є в папці `src`
 
-У папці `src` є три основні TypeScript-файли:
-
-- `index.ts` - файл запуску програми.
-- `functions.ts` - звичайні функції, оголошені через ключове слово `function`.
-- `arrow-functions.ts` - такі самі дії, але написані через стрілкові функції `=>`.
+- `index.ts` - головний файл запуску.
+- `functions.ts` - функції, написані через `function`.
+- `arrow-functions.ts` - такі самі функції, але написані через стрілковий синтаксис `=>`.
 
 ## Файл `src/functions.ts`
-
-Цей файл містить логіку для роботи з масивами. Тут є функції, які додають числа, склеюють рядки і можуть обробити обидва типи даних разом.
-
-### Блок типу `ProcessableItemType`
-
-```ts
-type ProcessableItemType = 'number' | 'string';
-```
-
-Цей блок створює власний тип. Він означає: змінна з таким типом може мати тільки одне з двох значень - `'number'` або `'string'`.
-
-Це потрібно для допоміжної функції `processArray`, щоб вона знала, які елементи шукати в масиві: числа або рядки.
-
-### Блок overload-сигнатур `processArray`
-
-```ts
-function processArray(arr: unknown, itemType: 'number', initialValue: number): number;
-function processArray(arr: unknown, itemType: 'string', initialValue: string): string;
-```
-
-Ці два рядки називаються overload-сигнатурами. Вони пояснюють TypeScript, що функція може працювати у двох режимах:
-
-- якщо `itemType` дорівнює `'number'`, функція поверне `number`;
-- якщо `itemType` дорівнює `'string'`, функція поверне `string`.
-
-Це потрібно, щоб TypeScript точніше розумів результат функції.
-
-### Блок реалізації `processArray`
-
-```ts
-function processArray(arr: unknown, itemType: ProcessableItemType, initialValue: number | string): number | string {
-```
-
-Це справжнє тіло функції, тобто місце, де написано, що саме вона робить.
-
-Параметри:
-
-- `arr: unknown` - дані невідомого типу. Ми не довіряємо їм одразу.
-- `itemType: ProcessableItemType` - тип елементів, які треба обробляти: `'number'` або `'string'`.
-- `initialValue: number | string` - початкове значення: `0` для чисел або `''` для рядків.
-
-Повертає функція `number | string`, бо результат залежить від режиму роботи.
-
-### Блок перевірки масиву
-
-```ts
-if (!Array.isArray(arr) || arr.length === 0) {
-    return initialValue;
-}
-```
-
-Цей блок перевіряє, чи справді в функцію передали масив.
-
-Якщо це не масив або масив порожній, функція не намагається його обробляти і просто повертає початкове значення.
-
-Це захищає програму від помилок.
-
-### Блок обробки чисел
-
-```ts
-if (itemType === 'number') {
-    let result = initialValue as number;
-
-    for (const item of arr) {
-        if (typeof item === 'number') {
-            result += item;
-        }
-    }
-
-    return result;
-}
-```
-
-Цей блок виконується тільки тоді, коли треба працювати з числами.
-
-Що тут відбувається:
-
-- створюється змінна `result`;
-- програма проходить по кожному елементу масиву;
-- через `typeof item === 'number'` перевіряє, чи елемент є числом;
-- якщо це число, додає його до `result`;
-- у кінці повертає суму.
-
-`as number` потрібен, щоб сказати TypeScript: у цьому блоці ми працюємо саме з числовим результатом.
-
-### Блок обробки рядків
-
-```ts
-let result = initialValue as string;
-
-for (const item of arr) {
-    if (typeof item === 'string') {
-        result += item;
-    }
-}
-
-return result;
-```
-
-Цей блок виконується тоді, коли `itemType` не `'number'`, тобто коли треба працювати з рядками.
-
-Що тут відбувається:
-
-- створюється змінна `result`;
-- програма проходить по масиву;
-- перевіряє, чи елемент є рядком;
-- якщо це рядок, додає його до загального тексту;
-- у кінці повертає склеєний рядок.
 
 ### Блок `sumNumbers`
 
 ```ts
-export function sumNumbers(arr: unknown): number {
-    return processArray(arr, 'number', 0);
-}
+export function sumNumbers(numbers: number[]): number {
 ```
 
 Це функція для додавання чисел.
 
-Вона викликає `processArray` у числовому режимі:
+- `numbers: number[]` означає, що функція приймає масив чисел.
+- `: number` після дужок означає, що функція повертає число.
+- `export` означає, що функцію можна використати в іншому файлі.
 
-- `'number'` означає, що треба шукати числа;
-- `0` - початкове значення для суми;
-- результат має тип `number`.
+```ts
+let sum = 0;
+```
 
-Слово `export` означає, що цю функцію можна імпортувати і використовувати в іншому файлі, наприклад в `index.ts`.
+Тут створюється змінна, у якій буде зберігатися сума.
+
+```ts
+for (const number of numbers) {
+    sum += number;
+}
+```
+
+Цикл проходить по кожному числу в масиві і додає його до `sum`.
+
+```ts
+return sum;
+```
+
+Функція повертає готову суму.
 
 ### Блок `concatStrings`
 
 ```ts
-export function concatStrings(arr: unknown): string {
-    return processArray(arr, 'string', '');
-}
+export function concatStrings(strings: string[]): string {
 ```
 
 Це функція для склеювання рядків.
 
-Вона викликає `processArray` у рядковому режимі:
+- `strings: string[]` означає, що функція приймає масив рядків.
+- `: string` означає, що функція повертає рядок.
 
-- `'string'` означає, що треба шукати рядки;
-- `''` - порожній рядок, з якого починається склеювання;
-- результат має тип `string`.
+```ts
+let result = '';
+```
+
+Тут створюється порожній рядок. У нього поступово додається текст.
+
+```ts
+for (const text of strings) {
+    result += text;
+}
+```
+
+Цикл проходить по кожному рядку в масиві і додає його до `result`.
+
+```ts
+return result;
+```
+
+Функція повертає один склеєний рядок.
 
 ### Блок `processBoth`
 
 ```ts
-export function processBoth(numbers: unknown, strings: unknown): string {
-    const sum = sumNumbers(numbers);
-    const text = concatStrings(strings);
-
-    return sum + ' ' + text;
-}
+export function processBoth(numbers: number[], strings: string[]): string {
 ```
 
-Ця функція об'єднує дві дії:
+Ця функція приймає два масиви:
 
-- `sumNumbers(numbers)` рахує суму чисел;
-- `concatStrings(strings)` склеює рядки;
-- `return sum + ' ' + text` повертає один спільний рядок.
+- `numbers: number[]` - масив чисел;
+- `strings: string[]` - масив рядків.
 
-Результат має тип `string`, бо навіть число при додаванні до рядка перетворюється на текст.
+```ts
+const sum = sumNumbers(numbers);
+const text = concatStrings(strings);
+```
+
+Тут функція використовує дві попередні функції:
+
+- `sumNumbers` рахує суму чисел;
+- `concatStrings` склеює рядки.
+
+```ts
+return sum + ' ' + text;
+```
+
+Функція повертає один рядок: спочатку сума, потім пробіл, потім текст.
 
 ## Файл `src/arrow-functions.ts`
 
-Цей файл робить майже те саме, що й `functions.ts`, але функції записані через стрілковий синтаксис `=>`.
-
-### Блок типу `ProcessableItemType`
-
-```ts
-type ProcessableItemType = 'number' | 'string';
-```
-
-Це такий самий тип, як у `functions.ts`. Він потрібен, щоб обмежити можливі значення для `itemType`.
-
-Функція може працювати тільки з двома режимами: `'number'` або `'string'`.
-
-### Блок інтерфейсу `ProcessArrayArrow`
-
-```ts
-interface ProcessArrayArrow {
-    (arr: unknown, itemType: 'number', initialValue: number): number;
-    (arr: unknown, itemType: 'string', initialValue: string): string;
-}
-```
-
-Цей блок описує, як може викликатися стрілкова функція `processArrayArrow`.
-
-Тут знову є два режими:
-
-- якщо передали `'number'` і `0`, повернеться `number`;
-- якщо передали `'string'` і `''`, повернеться `string`.
-
-Це не просто прикраса. Без цього TypeScript бачив би результат як `number | string`, і було б складніше точно сказати, що `sumNumbersArrow` повертає саме число, а `concatStringsArrow` саме рядок.
-
-### Блок створення `processArrayArrow`
-
-```ts
-const processArrayArrow = ((arr: unknown, itemType: ProcessableItemType, initialValue: number | string): number | string => {
-```
-
-Це стрілкова версія допоміжної функції.
-
-Вона приймає:
-
-- `arr` - дані, які треба перевірити;
-- `itemType` - тип елементів для пошуку;
-- `initialValue` - початкове значення.
-
-Функція повертає або число, або рядок.
-
-### Блок перевірки масиву
-
-```ts
-if (!Array.isArray(arr) || arr.length === 0) {
-    return initialValue;
-}
-```
-
-Цей блок такий самий за змістом, як у `functions.ts`.
-
-Він потрібен, щоб не обробляти неправильні або порожні дані.
-
-### Блок обробки чисел
-
-```ts
-if (itemType === 'number') {
-    let result = initialValue as number;
-
-    for (const item of arr) {
-        if (typeof item === 'number') {
-            result += item;
-        }
-    }
-
-    return result;
-}
-```
-
-Цей блок додає тільки ті елементи масиву, які справді є числами.
-
-Якщо в масив випадково потрапить рядок або `true`, цей блок їх пропустить.
-
-### Блок обробки рядків
-
-```ts
-let result = initialValue as string;
-
-for (const item of arr) {
-    if (typeof item === 'string') {
-        result += item;
-    }
-}
-
-return result;
-```
-
-Цей блок склеює тільки рядки.
-
-Інші типи даних він не додає до результату.
-
-### Блок `as ProcessArrayArrow`
-
-```ts
-}) as ProcessArrayArrow;
-```
-
-Цей блок говорить TypeScript: вважай `processArrayArrow` функцією з правилами, описаними в інтерфейсі `ProcessArrayArrow`.
-
-Це потрібно через те, що стрілкові функції не мають такого самого зручного синтаксису overload, як звичайні функції через `function`.
+Цей файл робить те саме, що `functions.ts`, але через стрілкові функції.
 
 ### Блок `sumNumbersArrow`
 
 ```ts
-export const sumNumbersArrow = (arr: unknown): number => {
-    return processArrayArrow(arr, 'number', 0);
-};
+export const sumNumbersArrow = (numbers: number[]): number => {
 ```
 
 Це стрілкова функція для додавання чисел.
 
-Вона викликає `processArrayArrow` у режимі `'number'`, тому результат має тип `number`.
+- `numbers: number[]` - вхідний масив чисел.
+- `: number` - результат буде числом.
+- `=>` показує, що це arrow function.
+
+Всередині логіка така сама: створюється `sum`, цикл додає всі числа, потім функція повертає результат.
 
 ### Блок `concatStringsArrow`
 
 ```ts
-export const concatStringsArrow = (arr: unknown): string => {
-    return processArrayArrow(arr, 'string', '');
-};
+export const concatStringsArrow = (strings: string[]): string => {
 ```
 
 Це стрілкова функція для склеювання рядків.
 
-Вона викликає `processArrayArrow` у режимі `'string'`, тому результат має тип `string`.
+- `strings: string[]` - вхідний масив рядків.
+- `: string` - результат буде рядком.
+
+Всередині створюється `result`, цикл додає до нього кожен рядок, а потім функція повертає готовий текст.
 
 ### Блок `processBothArrow`
 
 ```ts
-export const processBothArrow = (numbers: unknown, strings: unknown): string => {
-    const sum = sumNumbersArrow(numbers);
-    const text = concatStringsArrow(strings);
-
-    return sum + ' ' + text;
-};
+export const processBothArrow = (numbers: number[], strings: string[]): string => {
 ```
 
-Ця функція робить дві дії:
+Ця функція приймає масив чисел і масив рядків.
 
-- рахує суму чисел;
-- склеює рядки;
-- повертає все як один рядок.
+```ts
+const sum = sumNumbersArrow(numbers);
+const text = concatStringsArrow(strings);
+```
 
-Це стрілкова версія функції `processBoth` з файлу `functions.ts`.
+Тут вона викликає дві інші arrow-функції.
+
+```ts
+return sum + ' ' + text;
+```
+
+Повертається один рядок із сумою і текстом.
 
 ## Файл `src/index.ts`
 
-Це виконуючий файл. Саме його ми запускаємо командою:
+Це виконуючий файл. Саме він запускається командою:
 
 ```powershell
 npx tsx .\src\index.ts
@@ -352,88 +180,71 @@ import { concatStringsArrow, processBothArrow, sumNumbersArrow } from './arrow-f
 
 Цей блок підключає функції з інших файлів.
 
-Без імпортів `index.ts` не знав би, де взяти `sumNumbers`, `concatStrings`, `sumNumbersArrow`, `concatStringsArrow` і `processBothArrow`.
+Без `import` файл `index.ts` не міг би використати функції з `functions.ts` та `arrow-functions.ts`.
 
-### Блок тестових даних
+### Блок даних
 
 ```ts
-const numbers: number[] = [811.1026, 12.1, 871, 8, 103];
+const numbers: number[] = [911.1026, 12.1, 871, 8, 103];
 const strings: string[] = ['Hello, ', 'world!', ' This is ', 'TypeScript.'];
 ```
 
-Тут створюються два масиви:
+Тут створюються дані для перевірки функцій.
 
-- `numbers` - масив чисел;
+- `numbers` - масив чисел.
 - `strings` - масив рядків.
 
-`number[]` означає: у масиві мають бути тільки числа.
+TypeScript не дозволить випадково покласти рядок у `numbers` або число в `strings`.
 
-`string[]` означає: у масиві мають бути тільки рядки.
-
-Ці масиви потрібні, щоб перевірити роботу функцій.
-
-### Блок виводу результатів для чисел
+### Блок додавання чисел
 
 ```ts
 console.log('=== 1. Adding numbers ===');
 console.log('Sum of numbers:', sumNumbers(numbers));
 console.log('Sum with arrow function:', sumNumbersArrow(numbers));
-console.log('\n');
 ```
 
-Цей блок виводить у консоль заголовок і результати додавання чисел.
+Цей блок виводить у консоль суму чисел.
 
-Тут порівнюється робота двох функцій:
+Він показує, що звичайна функція `sumNumbers` і стрілкова функція `sumNumbersArrow` дають однаковий результат.
 
-- `sumNumbers` з файлу `functions.ts`;
-- `sumNumbersArrow` з файлу `arrow-functions.ts`.
-
-Обидві мають повернути однакову суму.
-
-### Блок виводу результатів для рядків
+### Блок склеювання рядків
 
 ```ts
 console.log('=== 2. Concatenating strings ===');
 console.log('String result:', concatStrings(strings));
 console.log('String result with arrow function:', concatStringsArrow(strings));
-console.log('\n');
 ```
 
-Цей блок виводить результат склеювання рядків.
+Цей блок виводить у консоль склеєний текст.
 
-Тут також порівнюються дві версії:
+Він порівнює звичайну функцію `concatStrings` і стрілкову функцію `concatStringsArrow`.
 
-- звичайна функція `concatStrings`;
-- стрілкова функція `concatStringsArrow`.
-
-### Блок виводу результату для обох типів
+### Блок обробки двох типів даних
 
 ```ts
 console.log('=== 3. Processing both types ===');
 console.log('Numbers and strings result:', processBothArrow(numbers, strings));
 ```
 
-Цей блок показує, як можна обробити числа і рядки разом.
-
-Функція `processBothArrow` спочатку рахує суму чисел, потім склеює рядки, а потім повертає один спільний результат.
+Цей блок показує, як одна функція може використати і масив чисел, і масив рядків.
 
 ## Що відбувається під час запуску
 
-Коли ти запускаєш:
+Коли виконується команда:
 
 ```powershell
 npx tsx .\src\index.ts
 ```
 
-відбувається така послідовність:
+відбувається таке:
 
 1. `npx` запускає пакет `tsx`.
-2. `tsx` читає файл `src/index.ts`.
-3. `tsx` розуміє TypeScript-код і запускає його без ручної компіляції в JavaScript.
-4. `index.ts` імпортує функції з `functions.ts` та `arrow-functions.ts`.
-5. Створюються масиви `numbers` і `strings`.
-6. Викликаються функції для додавання чисел і склеювання рядків.
-7. Результати виводяться в термінал.
+2. `tsx` читає TypeScript-файл `src/index.ts`.
+3. `index.ts` імпортує функції з інших файлів.
+4. Створюються масиви `numbers` і `strings`.
+5. Викликаються функції для додавання чисел і склеювання рядків.
+6. Результати виводяться в термінал.
 
 Очікуваний результат:
 
@@ -452,36 +263,9 @@ String result with arrow function: Hello, world! This is TypeScript.
 Numbers and strings result: 1805.2026 Hello, world! This is TypeScript.
 ```
 
-## Для чого тут TypeScript
-
-У JavaScript можна випадково передати не ті дані, наприклад рядок замість числа.
-TypeScript допомагає побачити такі помилки раніше, ще до запуску програми.
-
-Наприклад:
-
-```ts
-const numbers: number[] = [1, 2, 3];
-```
-
-Це означає, що в масиві `numbers` мають бути числа. Якщо спробувати додати туди текст, TypeScript покаже помилку.
-
-Також у функціях явно написано, що вони повертають:
-
-```ts
-export function sumNumbers(arr: unknown): number
-```
-
-Це означає: функція `sumNumbers` повертає число.
-
-```ts
-export function concatStrings(arr: unknown): string
-```
-
-Це означає: функція `concatStrings` повертає рядок.
-
 ## BestPractice: Вступ до TypeScript. Типи даних в TypeScript
 
-TypeScript - це JavaScript з типами. Він не замінює JavaScript, а додає до нього перевірку типів.
+TypeScript - це JavaScript з типами. Він допомагає знайти частину помилок ще до запуску програми.
 
 Основні типи:
 
@@ -490,17 +274,16 @@ TypeScript - це JavaScript з типами. Він не замінює JavaScr
 - `boolean` - логічне значення: `true` або `false`.
 - `number[]` - масив чисел: `[1, 2, 3]`.
 - `string[]` - масив рядків: `['a', 'b', 'c']`.
-- `unknown` - невідомий тип. Його треба перевірити перед використанням.
+- `unknown` - невідомий тип, який треба перевірити перед використанням.
 - `void` - функція нічого не повертає.
 
 Кращі практики:
 
-- Завжди вказуй типи для параметрів функцій.
+- Вказуй типи для параметрів функцій.
 - Вказуй тип, який функція повертає.
-- Для назв типів використовуй PascalCase, наприклад `ProcessableItemType`.
-- Не використовуй `any`, якщо можна використати точніший тип або `unknown`.
-- Якщо дані можуть бути різними, спочатку перевір їх через `typeof`, `Array.isArray` або інші перевірки.
-- Не дублюй однакову логіку: краще винести спільну частину в окрему допоміжну функцію.
-- Називай змінні так, щоб було зрозуміло, що в них зберігається: `numbers`, `strings`, `result`.
+- Використовуй прості типи там, де цього достатньо.
+- Не ускладнюй код helper-функціями, якщо задача проста.
+- Не використовуй `any`, якщо можна написати точний тип.
+- Називай змінні зрозуміло: `numbers`, `strings`, `sum`, `result`.
 
-Головне правило: типи потрібні не для ускладнення коду, а для того, щоб зробити код зрозумілішим і зменшити кількість помилок.
+Головне правило: типи мають робити код зрозумілішим, а не складнішим.

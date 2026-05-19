@@ -1,7 +1,7 @@
 import { concatStrings, sumNumbers } from './functions';
 import { concatStringsArrow, processBothArrow, sumNumbersArrow } from './arrow-functions';
 
-const numbers: number[] = [811.1026, 12.1, 871, 8, 103];
+const numbers: number[] = [911.1026, 12.1, 871, 8, 103];
 const strings: string[] = ['Hello, ', 'world!', ' This is ', 'TypeScript.'];
 
 console.log('=== 1. Adding numbers ===');
