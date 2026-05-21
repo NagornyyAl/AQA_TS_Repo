@@ -1,26 +1,20 @@
-export function sumNumbers(numbers: number[]): number {
-    let sum = 0;
+type ProcessableItem = string | number;
 
-    for (const number of numbers) {
-        sum += number;
-    }
+export function processItems(items: ProcessableItem[]): ProcessableItem {
+    let result: ProcessableItem = typeof items[0] === 'number' ? 0 : '';
 
-    return sum;
-}
-
-export function concatStrings(strings: string[]): string {
-    let result = '';
-
-    for (const text of strings) {
-        result += text;
+    for (const item of items) {
+        result = typeof result === 'number' && typeof item === 'number'
+            ? result + item
+            : `${result}${item}`;
     }
 
     return result;
 }
 
 export function processBoth(numbers: number[], strings: string[]): string {
-    const sum = sumNumbers(numbers);
-    const text = concatStrings(strings);
+    const sum = processItems(numbers);
+    const text = processItems(strings);
 
-    return sum + ' ' + text;
+    return `${sum} ${text}`;
 }
