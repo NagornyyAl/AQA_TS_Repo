@@ -1,14 +1,12 @@
 import { Bird } from './bird';
+import { RunningStrategy } from './movement-strategy';
 
 export class Ostrich extends Bird {
     public constructor(name: string) {
-        super(name, 'Ostrich', 65);
-    }
-    public makeSound(): void {
-        console.log(`${this.name} chirps.`);
+        super(name, 'Ostrich', new RunningStrategy(65));
     }
 
-    public move(): string {
-        return `${this.name} runs with max speed ${this.getMaxSpeedLevel()} km/h.`;
+    public makeSound(): void {
+        console.log(`${this.getName()} chirps.`);
     }
 }

@@ -1,11 +1,17 @@
 import { IBird } from './i-bird';
+import { IMovementStrategy } from './movement-strategy';
 
 export abstract class Bird implements IBird {
     public constructor(
-        public name: string,
-        protected species: string,
-        private maxSpeedLevel: number
+        private readonly name: string,
+        private readonly species: string,
+        private readonly movementStrategy: IMovementStrategy
     ) {}
+
+    public getName(): string {
+        return this.name;
+    }
+
     public getInfo(): string {
         return `Name: ${this.name}, Species: ${this.species}`;
     }
@@ -16,9 +22,7 @@ export abstract class Bird implements IBird {
 
     public abstract makeSound(): void;
 
-    public abstract move(): string;
-
-    protected getMaxSpeedLevel(): number {
-        return this.maxSpeedLevel;
+    public move(): string {
+        return this.movementStrategy.move(this.name);
     }
 }
