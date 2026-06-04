@@ -1,0 +1,28 @@
+{
+  "include": ["./src/**/*", "./tests/**/*", "./vitest.config.ts"],
+  "exclude": ["./dist/**/*", "./node_modules/**/*"],
+  "compileOnSave": false,
+  "compilerOptions": {
+      "noEmit": false,
+      "declaration": false,
+      "emitDecoratorMetadata": true,
+      "esModuleInterop": true,
+      "experimentalDecorators": true,
+      "forceConsistentCasingInFileNames": true,
+      "importHelpers": true,
+      "lib": ["DOM", "ES2020", "esnext"],
+      "module": "ESNext",
+      "moduleResolution": "bundler",
+      "noFallthroughCasesInSwitch": true,
+      "rootDir": "./",
+      "outDir": "./dist/out-tsc",
+      "skipLibCheck": true,
+      "sourceMap": true,
+      "target": "ESNext",
+      "typeRoots": ["node_modules/@types"],
+      "types": ["node", "mocha"],
+      "noImplicitAny": false,
+      "strict": true,
+      // "noUncheckedIndexedAccess": true  // TS 7.0 may default this
+  }
+}
