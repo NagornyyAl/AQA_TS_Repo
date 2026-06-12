@@ -1,0 +1,436 @@
+{
+  "info": {
+    "_postman_id": "7f9b27d0-4d2b-4b7b-bd42-3d5f2f2c8b9a",
+    "name": "Official Joke API - Lesson 12",
+    "description": "Postman collection for Lesson 12 API testing homework. It uses a collection variable `base_url` and can be run locally with Newman after starting the API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "TC01 - Ping returns pong",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/ping",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "ping"
+          ]
+        },
+        "description": "Checks that the local API process is alive."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response body is pong\", () => {",
+              "  pm.expect(pm.response.text()).to.eql(\"pong\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC02 - Get random joke",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/random_joke",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "random_joke"
+          ]
+        },
+        "description": "Checks the legacy random joke endpoint."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response contains a valid joke object\", () => {",
+              "  const joke = pm.response.json();",
+              "  pm.expect(joke).to.be.an(\"object\");",
+              "  pm.expect(joke).to.include.keys([\"type\", \"setup\", \"punchline\", \"id\"]);",
+              "  pm.expect(joke.type).to.be.a(\"string\");",
+              "  pm.expect(joke.setup).to.be.a(\"string\");",
+              "  pm.expect(joke.punchline).to.be.a(\"string\");",
+              "  pm.expect(joke.id).to.be.a(\"number\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC03 - Get random joke via /jokes/random",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/jokes/random",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "jokes",
+            "random"
+          ]
+        },
+        "description": "Checks the documented /jokes/random endpoint."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response contains a valid joke object\", () => {",
+              "  const joke = pm.response.json();",
+              "  pm.expect(joke).to.be.an(\"object\");",
+              "  pm.expect(joke).to.include.keys([\"type\", \"setup\", \"punchline\", \"id\"]);",
+              "  pm.expect(joke.type).to.be.a(\"string\");",
+              "  pm.expect(joke.setup).to.be.a(\"string\");",
+              "  pm.expect(joke.punchline).to.be.a(\"string\");",
+              "  pm.expect(joke.id).to.be.a(\"number\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC04 - Get ten random jokes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/random_ten",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "random_ten"
+          ]
+        },
+        "description": "Checks that the legacy ten-random endpoint returns 10 unique jokes."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response returns 10 valid jokes\", () => {",
+              "  const jokes = pm.response.json();",
+              "  pm.expect(jokes).to.be.an(\"array\").with.lengthOf(10);",
+              "  const ids = jokes.map(joke => joke.id);",
+              "  pm.expect(new Set(ids).size).to.eql(jokes.length);",
+              "  jokes.forEach(joke => {",
+              "    pm.expect(joke).to.include.keys([\"type\", \"setup\", \"punchline\", \"id\"]);",
+              "    pm.expect(joke.id).to.be.a(\"number\");",
+              "  });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC05 - Get ten jokes via /jokes/ten",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/jokes/ten",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "jokes",
+            "ten"
+          ]
+        },
+        "description": "Checks the documented /jokes/ten endpoint."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response returns 10 unique jokes\", () => {",
+              "  const jokes = pm.response.json();",
+              "  pm.expect(jokes).to.be.an(\"array\").with.lengthOf(10);",
+              "  const ids = jokes.map(joke => joke.id);",
+              "  pm.expect(new Set(ids).size).to.eql(jokes.length);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC06 - Get five random jokes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/jokes/random/5",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "jokes",
+            "random",
+            "5"
+          ]
+        },
+        "description": "Checks the endpoint for requesting an arbitrary number of random jokes."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response returns exactly 5 valid jokes\", () => {",
+              "  const jokes = pm.response.json();",
+              "  pm.expect(jokes).to.be.an(\"array\").with.lengthOf(5);",
+              "  jokes.forEach(joke => {",
+              "    pm.expect(joke).to.include.keys([\"type\", \"setup\", \"punchline\", \"id\"]);",
+              "    pm.expect(joke.id).to.be.a(\"number\");",
+              "  });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC07 - Get joke types",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/types",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "types"
+          ]
+        },
+        "description": "Checks that the API returns the documented joke categories."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response contains expected joke types\", () => {",
+              "  const types = pm.response.json();",
+              "  pm.expect(types).to.be.an(\"array\");",
+              "  pm.expect(types).to.have.members([\"general\", \"knock-knock\", \"programming\", \"dad\"]);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC08 - Get one programming joke",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/jokes/programming/random",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "jokes",
+            "programming",
+            "random"
+          ]
+        },
+        "description": "Checks filtering by joke type for a single programming joke."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response returns one programming joke\", () => {",
+              "  const jokes = pm.response.json();",
+              "  pm.expect(jokes).to.be.an(\"array\").with.lengthOf(1);",
+              "  pm.expect(jokes[0]).to.include.keys([\"type\", \"setup\", \"punchline\", \"id\"]);",
+              "  pm.expect(jokes[0].type).to.eql(\"programming\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC09 - Get ten programming jokes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/jokes/programming/ten",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "jokes",
+            "programming",
+            "ten"
+          ]
+        },
+        "description": "Checks filtering by joke type for ten programming jokes."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response returns 10 programming jokes\", () => {",
+              "  const jokes = pm.response.json();",
+              "  pm.expect(jokes).to.be.an(\"array\").with.lengthOf(10);",
+              "  jokes.forEach(joke => {",
+              "    pm.expect(joke.type).to.eql(\"programming\");",
+              "    pm.expect(joke).to.include.keys([\"type\", \"setup\", \"punchline\", \"id\"]);",
+              "  });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC10 - Missing joke id returns 404",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/jokes/999999",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "jokes",
+            "999999"
+          ]
+        },
+        "description": "Checks API error handling for a joke id that does not exist."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 404\", () => {",
+              "  pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test(\"Response contains error payload\", () => {",
+              "  const error = pm.response.json();",
+              "  pm.expect(error).to.include.keys([\"type\", \"message\"]);",
+              "  pm.expect(error.type).to.eql(\"error\");",
+              "  pm.expect(error.message).to.eql(\"joke not found\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3005",
+      "type": "string"
+    }
+  ]
+}
