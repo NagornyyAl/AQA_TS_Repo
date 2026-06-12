@@ -1,0 +1,17 @@
+{
+  "name": "lesson11-task",
+  "version": "1.0.0",
+  "description": "Independent Vitest mocking task based on lesson9 birds example",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.7"
+  }
+}
