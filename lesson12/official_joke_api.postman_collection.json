@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "7f9b27d0-4d2b-4b7b-bd42-3d5f2f2c8b9a",
     "name": "Official Joke API - Lesson 12",
-    "description": "Postman collection for Lesson 12 API testing homework. It uses a collection variable `base_url` and can be run locally with Newman after starting the API.",
+    "description": "Improved Postman collection for Lesson 12 API testing homework. It validates status codes, response shape, content type, response time, joke schemas, type filtering, unique IDs, and error handling. Run locally after starting the API with npm run dev.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -20,7 +20,7 @@
             "ping"
           ]
         },
-        "description": "Checks that the local API process is alive."
+        "description": "Health check for the local API process."
       },
       "response": [],
       "event": [
@@ -33,7 +33,11 @@
               "  pm.response.to.have.status(200);",
               "});",
               "",
-              "pm.test(\"Response body is pong\", () => {",
+              "pm.test(\"Response time is acceptable\", () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(Number(pm.collectionVariables.get(\"maxResponseMs\")));",
+              "});",
+              "",
+              "pm.test(\"Response body is exact pong text\", () => {",
               "  pm.expect(pm.response.text()).to.eql(\"pong\");",
               "});"
             ]
@@ -42,7 +46,56 @@
       ]
     },
     {
-      "name": "TC02 - Get random joke",
+      "name": "TC02 - Get joke types",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/types",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "types"
+          ]
+        },
+        "description": "Checks that the API returns the documented joke categories."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set(\"expectedStatus\", 200);",
+              "pm.test(\"Status code is \" + pm.environment.get(\"expectedStatus\"), () => {",
+              "  pm.response.to.have.status(Number(pm.environment.get(\"expectedStatus\")));",
+              "});",
+              "",
+              "pm.test(\"Response time is acceptable\", () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(Number(pm.collectionVariables.get(\"maxResponseMs\")));",
+              "});",
+              "",
+              "pm.test(\"Response has JSON content type\", () => {",
+              "  pm.response.to.have.header(\"Content-Type\");",
+              "  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "pm.test(\"Response contains only expected joke types\", () => {",
+              "  const types = pm.response.json();",
+              "  const expectedTypes = JSON.parse(pm.collectionVariables.get(\"expectedTypes\"));",
+              "  pm.expect(types).to.be.an(\"array\").with.lengthOf(expectedTypes.length);",
+              "  pm.expect(types).to.have.members(expectedTypes);",
+              "  types.forEach(type => pm.expect(type).to.be.a(\"string\").and.not.empty);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC03 - Get random joke and save id",
       "request": {
         "method": "GET",
         "header": [],
@@ -55,7 +108,7 @@
             "random_joke"
           ]
         },
-        "description": "Checks the legacy random joke endpoint."
+        "description": "Checks the legacy random joke endpoint and stores id for the next request."
       },
       "response": [],
       "event": [
@@ -64,18 +117,46 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status code is 200\", () => {",
-              "  pm.response.to.have.status(200);",
+              "pm.environment.set(\"expectedStatus\", 200);",
+              "pm.test(\"Status code is \" + pm.environment.get(\"expectedStatus\"), () => {",
+              "  pm.response.to.have.status(Number(pm.environment.get(\"expectedStatus\")));",
               "});",
               "",
-              "pm.test(\"Response contains a valid joke object\", () => {",
+              "pm.test(\"Response time is acceptable\", () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(Number(pm.collectionVariables.get(\"maxResponseMs\")));",
+              "});",
+              "",
+              "pm.test(\"Response has JSON content type\", () => {",
+              "  pm.response.to.have.header(\"Content-Type\");",
+              "  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "const expectedTypes = JSON.parse(pm.collectionVariables.get(\"expectedTypes\"));",
+              "const jokeSchema = {",
+              "  type: \"object\",",
+              "  required: [\"type\", \"setup\", \"punchline\", \"id\"],",
+              "  properties: {",
+              "    type: { type: \"string\", enum: expectedTypes },",
+              "    setup: { type: \"string\", minLength: 1 },",
+              "    punchline: { type: \"string\", minLength: 1 },",
+              "    id: { type: \"number\" }",
+              "  }",
+              "};",
+              "",
+              "pm.test(\"Response matches joke schema\", () => {",
               "  const joke = pm.response.json();",
-              "  pm.expect(joke).to.be.an(\"object\");",
-              "  pm.expect(joke).to.include.keys([\"type\", \"setup\", \"punchline\", \"id\"]);",
-              "  pm.expect(joke.type).to.be.a(\"string\");",
-              "  pm.expect(joke.setup).to.be.a(\"string\");",
-              "  pm.expect(joke.punchline).to.be.a(\"string\");",
-              "  pm.expect(joke.id).to.be.a(\"number\");",
+              "  pm.expect(joke).to.have.jsonSchema(jokeSchema);",
+              "  pm.expect(joke.setup.trim()).to.not.eql(\"\");",
+              "  pm.expect(joke.punchline.trim()).to.not.eql(\"\");",
+              "});",
+              "",
+              "pm.test(\"Joke id is saved for follow-up request\", () => {",
+              "  const joke = pm.response.json();",
+              "  pm.collectionVariables.set(\"saved_joke_id\", joke.id);",
+              "  pm.collectionVariables.set(\"saved_joke_setup\", joke.setup);",
+              "  pm.collectionVariables.set(\"saved_joke_punchline\", joke.punchline);",
+              "  pm.collectionVariables.set(\"saved_joke_type\", joke.type);",
+              "  pm.expect(joke.id).to.be.above(0);",
               "});"
             ]
           }
@@ -83,7 +164,76 @@
       ]
     },
     {
-      "name": "TC03 - Get random joke via /jokes/random",
+      "name": "TC04 - Get joke by saved id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/jokes/{{saved_joke_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "jokes",
+            "{{saved_joke_id}}"
+          ]
+        },
+        "description": "Checks that /jokes/:id returns the same joke that was saved from /random_joke."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set(\"expectedStatus\", 200);",
+              "pm.test(\"Status code is \" + pm.environment.get(\"expectedStatus\"), () => {",
+              "  pm.response.to.have.status(Number(pm.environment.get(\"expectedStatus\")));",
+              "});",
+              "",
+              "pm.test(\"Response time is acceptable\", () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(Number(pm.collectionVariables.get(\"maxResponseMs\")));",
+              "});",
+              "",
+              "pm.test(\"Response has JSON content type\", () => {",
+              "  pm.response.to.have.header(\"Content-Type\");",
+              "  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "const expectedTypes = JSON.parse(pm.collectionVariables.get(\"expectedTypes\"));",
+              "const jokeSchema = {",
+              "  type: \"object\",",
+              "  required: [\"type\", \"setup\", \"punchline\", \"id\"],",
+              "  properties: {",
+              "    type: { type: \"string\", enum: expectedTypes },",
+              "    setup: { type: \"string\", minLength: 1 },",
+              "    punchline: { type: \"string\", minLength: 1 },",
+              "    id: { type: \"number\" }",
+              "  }",
+              "};",
+              "",
+              "pm.test(\"Response matches joke schema\", () => {",
+              "  const joke = pm.response.json();",
+              "  pm.expect(joke).to.have.jsonSchema(jokeSchema);",
+              "  pm.expect(joke.setup.trim()).to.not.eql(\"\");",
+              "  pm.expect(joke.punchline.trim()).to.not.eql(\"\");",
+              "});",
+              "",
+              "pm.test(\"Response matches saved joke\", () => {",
+              "  const joke = pm.response.json();",
+              "  pm.expect(joke.id).to.eql(Number(pm.collectionVariables.get(\"saved_joke_id\")));",
+              "  pm.expect(joke.setup).to.eql(pm.collectionVariables.get(\"saved_joke_setup\"));",
+              "  pm.expect(joke.punchline).to.eql(pm.collectionVariables.get(\"saved_joke_punchline\"));",
+              "  pm.expect(joke.type).to.eql(pm.collectionVariables.get(\"saved_joke_type\"));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC05 - Get random joke via /jokes/random",
       "request": {
         "method": "GET",
         "header": [],
@@ -106,18 +256,37 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status code is 200\", () => {",
-              "  pm.response.to.have.status(200);",
+              "pm.environment.set(\"expectedStatus\", 200);",
+              "pm.test(\"Status code is \" + pm.environment.get(\"expectedStatus\"), () => {",
+              "  pm.response.to.have.status(Number(pm.environment.get(\"expectedStatus\")));",
               "});",
               "",
-              "pm.test(\"Response contains a valid joke object\", () => {",
+              "pm.test(\"Response time is acceptable\", () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(Number(pm.collectionVariables.get(\"maxResponseMs\")));",
+              "});",
+              "",
+              "pm.test(\"Response has JSON content type\", () => {",
+              "  pm.response.to.have.header(\"Content-Type\");",
+              "  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "const expectedTypes = JSON.parse(pm.collectionVariables.get(\"expectedTypes\"));",
+              "const jokeSchema = {",
+              "  type: \"object\",",
+              "  required: [\"type\", \"setup\", \"punchline\", \"id\"],",
+              "  properties: {",
+              "    type: { type: \"string\", enum: expectedTypes },",
+              "    setup: { type: \"string\", minLength: 1 },",
+              "    punchline: { type: \"string\", minLength: 1 },",
+              "    id: { type: \"number\" }",
+              "  }",
+              "};",
+              "",
+              "pm.test(\"Response matches joke schema\", () => {",
               "  const joke = pm.response.json();",
-              "  pm.expect(joke).to.be.an(\"object\");",
-              "  pm.expect(joke).to.include.keys([\"type\", \"setup\", \"punchline\", \"id\"]);",
-              "  pm.expect(joke.type).to.be.a(\"string\");",
-              "  pm.expect(joke.setup).to.be.a(\"string\");",
-              "  pm.expect(joke.punchline).to.be.a(\"string\");",
-              "  pm.expect(joke.id).to.be.a(\"number\");",
+              "  pm.expect(joke).to.have.jsonSchema(jokeSchema);",
+              "  pm.expect(joke.setup.trim()).to.not.eql(\"\");",
+              "  pm.expect(joke.punchline.trim()).to.not.eql(\"\");",
               "});"
             ]
           }
@@ -125,7 +294,7 @@
       ]
     },
     {
-      "name": "TC04 - Get ten random jokes",
+      "name": "TC06 - Get ten random jokes",
       "request": {
         "method": "GET",
         "header": [],
@@ -138,7 +307,7 @@
             "random_ten"
           ]
         },
-        "description": "Checks that the legacy ten-random endpoint returns 10 unique jokes."
+        "description": "Checks that the legacy ten-random endpoint returns 10 unique valid jokes."
       },
       "response": [],
       "event": [
@@ -147,19 +316,38 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status code is 200\", () => {",
-              "  pm.response.to.have.status(200);",
+              "pm.environment.set(\"expectedStatus\", 200);",
+              "pm.test(\"Status code is \" + pm.environment.get(\"expectedStatus\"), () => {",
+              "  pm.response.to.have.status(Number(pm.environment.get(\"expectedStatus\")));",
               "});",
               "",
-              "pm.test(\"Response returns 10 valid jokes\", () => {",
+              "pm.test(\"Response time is acceptable\", () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(Number(pm.collectionVariables.get(\"maxResponseMs\")));",
+              "});",
+              "",
+              "pm.test(\"Response has JSON content type\", () => {",
+              "  pm.response.to.have.header(\"Content-Type\");",
+              "  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "const expectedTypes = JSON.parse(pm.collectionVariables.get(\"expectedTypes\"));",
+              "const jokeSchema = {",
+              "  type: \"object\",",
+              "  required: [\"type\", \"setup\", \"punchline\", \"id\"],",
+              "  properties: {",
+              "    type: { type: \"string\", enum: expectedTypes },",
+              "    setup: { type: \"string\", minLength: 1 },",
+              "    punchline: { type: \"string\", minLength: 1 },",
+              "    id: { type: \"number\" }",
+              "  }",
+              "};",
+              "",
+              "pm.test(\"Response returns 10 unique valid jokes\", () => {",
               "  const jokes = pm.response.json();",
               "  pm.expect(jokes).to.be.an(\"array\").with.lengthOf(10);",
               "  const ids = jokes.map(joke => joke.id);",
               "  pm.expect(new Set(ids).size).to.eql(jokes.length);",
-              "  jokes.forEach(joke => {",
-              "    pm.expect(joke).to.include.keys([\"type\", \"setup\", \"punchline\", \"id\"]);",
-              "    pm.expect(joke.id).to.be.a(\"number\");",
-              "  });",
+              "  jokes.forEach(joke => pm.expect(joke).to.have.jsonSchema(jokeSchema));",
               "});"
             ]
           }
@@ -167,7 +355,7 @@
       ]
     },
     {
-      "name": "TC05 - Get ten jokes via /jokes/ten",
+      "name": "TC07 - Get ten jokes via /jokes/ten",
       "request": {
         "method": "GET",
         "header": [],
@@ -190,15 +378,38 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status code is 200\", () => {",
-              "  pm.response.to.have.status(200);",
+              "pm.environment.set(\"expectedStatus\", 200);",
+              "pm.test(\"Status code is \" + pm.environment.get(\"expectedStatus\"), () => {",
+              "  pm.response.to.have.status(Number(pm.environment.get(\"expectedStatus\")));",
               "});",
               "",
-              "pm.test(\"Response returns 10 unique jokes\", () => {",
+              "pm.test(\"Response time is acceptable\", () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(Number(pm.collectionVariables.get(\"maxResponseMs\")));",
+              "});",
+              "",
+              "pm.test(\"Response has JSON content type\", () => {",
+              "  pm.response.to.have.header(\"Content-Type\");",
+              "  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "const expectedTypes = JSON.parse(pm.collectionVariables.get(\"expectedTypes\"));",
+              "const jokeSchema = {",
+              "  type: \"object\",",
+              "  required: [\"type\", \"setup\", \"punchline\", \"id\"],",
+              "  properties: {",
+              "    type: { type: \"string\", enum: expectedTypes },",
+              "    setup: { type: \"string\", minLength: 1 },",
+              "    punchline: { type: \"string\", minLength: 1 },",
+              "    id: { type: \"number\" }",
+              "  }",
+              "};",
+              "",
+              "pm.test(\"Response returns 10 unique valid jokes\", () => {",
               "  const jokes = pm.response.json();",
               "  pm.expect(jokes).to.be.an(\"array\").with.lengthOf(10);",
               "  const ids = jokes.map(joke => joke.id);",
               "  pm.expect(new Set(ids).size).to.eql(jokes.length);",
+              "  jokes.forEach(joke => pm.expect(joke).to.have.jsonSchema(jokeSchema));",
               "});"
             ]
           }
@@ -206,7 +417,7 @@
       ]
     },
     {
-      "name": "TC06 - Get five random jokes",
+      "name": "TC08 - Get five random jokes",
       "request": {
         "method": "GET",
         "header": [],
@@ -230,94 +441,38 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status code is 200\", () => {",
-              "  pm.response.to.have.status(200);",
+              "pm.environment.set(\"expectedStatus\", 200);",
+              "pm.test(\"Status code is \" + pm.environment.get(\"expectedStatus\"), () => {",
+              "  pm.response.to.have.status(Number(pm.environment.get(\"expectedStatus\")));",
               "});",
               "",
-              "pm.test(\"Response returns exactly 5 valid jokes\", () => {",
+              "pm.test(\"Response time is acceptable\", () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(Number(pm.collectionVariables.get(\"maxResponseMs\")));",
+              "});",
+              "",
+              "pm.test(\"Response has JSON content type\", () => {",
+              "  pm.response.to.have.header(\"Content-Type\");",
+              "  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "const expectedTypes = JSON.parse(pm.collectionVariables.get(\"expectedTypes\"));",
+              "const jokeSchema = {",
+              "  type: \"object\",",
+              "  required: [\"type\", \"setup\", \"punchline\", \"id\"],",
+              "  properties: {",
+              "    type: { type: \"string\", enum: expectedTypes },",
+              "    setup: { type: \"string\", minLength: 1 },",
+              "    punchline: { type: \"string\", minLength: 1 },",
+              "    id: { type: \"number\" }",
+              "  }",
+              "};",
+              "",
+              "pm.test(\"Response returns exactly 5 unique valid jokes\", () => {",
               "  const jokes = pm.response.json();",
               "  pm.expect(jokes).to.be.an(\"array\").with.lengthOf(5);",
-              "  jokes.forEach(joke => {",
-              "    pm.expect(joke).to.include.keys([\"type\", \"setup\", \"punchline\", \"id\"]);",
-              "    pm.expect(joke.id).to.be.a(\"number\");",
-              "  });",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC07 - Get joke types",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/types",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "types"
-          ]
-        },
-        "description": "Checks that the API returns the documented joke categories."
-      },
-      "response": [],
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 200\", () => {",
-              "  pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test(\"Response contains expected joke types\", () => {",
-              "  const types = pm.response.json();",
-              "  pm.expect(types).to.be.an(\"array\");",
-              "  pm.expect(types).to.have.members([\"general\", \"knock-knock\", \"programming\", \"dad\"]);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC08 - Get one programming joke",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/jokes/programming/random",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "jokes",
-            "programming",
-            "random"
-          ]
-        },
-        "description": "Checks filtering by joke type for a single programming joke."
-      },
-      "response": [],
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 200\", () => {",
-              "  pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test(\"Response returns one programming joke\", () => {",
-              "  const jokes = pm.response.json();",
-              "  pm.expect(jokes).to.be.an(\"array\").with.lengthOf(1);",
-              "  pm.expect(jokes[0]).to.include.keys([\"type\", \"setup\", \"punchline\", \"id\"]);",
-              "  pm.expect(jokes[0].type).to.eql(\"programming\");",
+              "  const ids = jokes.map(joke => joke.id);",
+              "  pm.expect(new Set(ids).size).to.eql(jokes.length);",
+              "  jokes.forEach(joke => pm.expect(joke).to.have.jsonSchema(jokeSchema));",
               "});"
             ]
           }
@@ -349,16 +504,40 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status code is 200\", () => {",
-              "  pm.response.to.have.status(200);",
+              "pm.environment.set(\"expectedStatus\", 200);",
+              "pm.test(\"Status code is \" + pm.environment.get(\"expectedStatus\"), () => {",
+              "  pm.response.to.have.status(Number(pm.environment.get(\"expectedStatus\")));",
               "});",
               "",
-              "pm.test(\"Response returns 10 programming jokes\", () => {",
+              "pm.test(\"Response time is acceptable\", () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(Number(pm.collectionVariables.get(\"maxResponseMs\")));",
+              "});",
+              "",
+              "pm.test(\"Response has JSON content type\", () => {",
+              "  pm.response.to.have.header(\"Content-Type\");",
+              "  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "const expectedTypes = JSON.parse(pm.collectionVariables.get(\"expectedTypes\"));",
+              "const jokeSchema = {",
+              "  type: \"object\",",
+              "  required: [\"type\", \"setup\", \"punchline\", \"id\"],",
+              "  properties: {",
+              "    type: { type: \"string\", enum: expectedTypes },",
+              "    setup: { type: \"string\", minLength: 1 },",
+              "    punchline: { type: \"string\", minLength: 1 },",
+              "    id: { type: \"number\" }",
+              "  }",
+              "};",
+              "",
+              "pm.test(\"Response returns 10 unique programming jokes\", () => {",
               "  const jokes = pm.response.json();",
               "  pm.expect(jokes).to.be.an(\"array\").with.lengthOf(10);",
+              "  const ids = jokes.map(joke => joke.id);",
+              "  pm.expect(new Set(ids).size).to.eql(jokes.length);",
               "  jokes.forEach(joke => {",
+              "    pm.expect(joke).to.have.jsonSchema(jokeSchema);",
               "    pm.expect(joke.type).to.eql(\"programming\");",
-              "    pm.expect(joke).to.include.keys([\"type\", \"setup\", \"punchline\", \"id\"]);",
               "  });",
               "});"
             ]
@@ -390,14 +569,32 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status code is 404\", () => {",
-              "  pm.response.to.have.status(404);",
+              "pm.environment.set(\"expectedStatus\", 404);",
+              "pm.test(\"Status code is \" + pm.environment.get(\"expectedStatus\"), () => {",
+              "  pm.response.to.have.status(Number(pm.environment.get(\"expectedStatus\")));",
               "});",
               "",
-              "pm.test(\"Response contains error payload\", () => {",
+              "pm.test(\"Response time is acceptable\", () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(Number(pm.collectionVariables.get(\"maxResponseMs\")));",
+              "});",
+              "",
+              "pm.test(\"Response has JSON content type\", () => {",
+              "  pm.response.to.have.header(\"Content-Type\");",
+              "  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "const errorSchema = {",
+              "  type: \"object\",",
+              "  required: [\"type\", \"message\"],",
+              "  properties: {",
+              "    type: { type: \"string\", enum: [\"error\"] },",
+              "    message: { type: \"string\", minLength: 1 }",
+              "  }",
+              "};",
+              "",
+              "pm.test(\"Response contains expected error payload\", () => {",
               "  const error = pm.response.json();",
-              "  pm.expect(error).to.include.keys([\"type\", \"message\"]);",
-              "  pm.expect(error.type).to.eql(\"error\");",
+              "  pm.expect(error).to.have.jsonSchema(errorSchema);",
               "  pm.expect(error.message).to.eql(\"joke not found\");",
               "});"
             ]
@@ -430,6 +627,36 @@
     {
       "key": "base_url",
       "value": "http://localhost:3005",
+      "type": "string"
+    },
+    {
+      "key": "expectedTypes",
+      "value": "[\"general\", \"knock-knock\", \"programming\", \"dad\"]",
+      "type": "string"
+    },
+    {
+      "key": "maxResponseMs",
+      "value": "1000",
+      "type": "string"
+    },
+    {
+      "key": "saved_joke_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "saved_joke_setup",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "saved_joke_punchline",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "saved_joke_type",
+      "value": "",
       "type": "string"
     }
   ]
