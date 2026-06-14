@@ -1,0 +1,640 @@
+{
+    "info": {
+        "_postman_id": "9d92e26b-a493-4fbf-9348-55f7455e9c9f",
+        "name": "Lesson 13 API Scenarios",
+        "description": "Postman scenarios for Lesson 13: Cat API integration flow and Petstore /store/order smoke flow.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Cat API Integration Flow",
+            "description": "Sequential flow: breeds -> images -> votes -> favourites -> cleanup.",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "if (!pm.variables.get(\"cat_api_key\")) {",
+                            "    throw new Error(\"Set cat_api_key in Postman environment or collection variables before running Cat API flow.\");",
+                            "}"
+                        ]
+                    }
+                }
+            ],
+            "item": [
+                {
+                    "name": "01 - Search breed and prepare run data",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.collectionVariables.set(\"sub_id\", \"lesson13-postman-\" + Date.now());",
+                                    "pm.collectionVariables.unset(\"breed_id\");",
+                                    "pm.collectionVariables.unset(\"breed_name\");",
+                                    "pm.collectionVariables.unset(\"image_id\");",
+                                    "pm.collectionVariables.unset(\"vote_id\");",
+                                    "pm.collectionVariables.unset(\"favourite_id\");"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "const breeds = pm.response.json();",
+                                    "",
+                                    "pm.test(\"At least one breed is returned\", function () {",
+                                    "    pm.expect(breeds).to.be.an(\"array\").and.not.empty;",
+                                    "});",
+                                    "",
+                                    "const selectedBreed = breeds.find((breed) => breed.id === \"sibe\") || breeds[0];",
+                                    "pm.collectionVariables.set(\"breed_id\", selectedBreed.id);",
+                                    "pm.collectionVariables.set(\"breed_name\", selectedBreed.name);",
+                                    "",
+                                    "pm.test(\"Selected breed has id and name\", function () {",
+                                    "    pm.expect(selectedBreed.id).to.be.a(\"string\").and.not.empty;",
+                                    "    pm.expect(selectedBreed.name).to.be.a(\"string\").and.not.empty;",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "x-api-key",
+                                "value": "{{cat_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{cat_base_url}}/breeds/search?q={{breed_query}}&attach_image=1"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "02 - Get selected breed by id",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "const breed = pm.response.json();",
+                                    "",
+                                    "pm.test(\"Breed details match selected breed\", function () {",
+                                    "    pm.expect(breed.id).to.eql(pm.collectionVariables.get(\"breed_id\"));",
+                                    "    pm.expect(breed.name).to.eql(pm.collectionVariables.get(\"breed_name\"));",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "x-api-key",
+                                "value": "{{cat_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{cat_base_url}}/breeds/{{breed_id}}"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "03 - Search image for selected breed",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "const images = pm.response.json();",
+                                    "const image = images[0];",
+                                    "const breedId = pm.collectionVariables.get(\"breed_id\");",
+                                    "",
+                                    "pm.test(\"Image for selected breed is returned\", function () {",
+                                    "    pm.expect(images).to.be.an(\"array\").and.not.empty;",
+                                    "    pm.expect(image.id).to.be.a(\"string\").and.not.empty;",
+                                    "    pm.expect(image.url).to.match(/^https:\\/\\//);",
+                                    "    pm.expect(image.breeds.some((breed) => breed.id === breedId)).to.eql(true);",
+                                    "});",
+                                    "",
+                                    "pm.collectionVariables.set(\"image_id\", image.id);",
+                                    "pm.collectionVariables.set(\"image_url\", image.url);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "x-api-key",
+                                "value": "{{cat_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{cat_base_url}}/images/search?breed_ids={{breed_id}}&has_breeds=true&limit=1"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "04 - Create vote for image",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "const vote = pm.response.json();",
+                                    "pm.collectionVariables.set(\"vote_id\", String(vote.id));",
+                                    "",
+                                    "pm.test(\"Vote links to selected image and sub_id\", function () {",
+                                    "    pm.expect(vote.id).to.be.a(\"number\");",
+                                    "    pm.expect(vote.image_id).to.eql(pm.collectionVariables.get(\"image_id\"));",
+                                    "    pm.expect(vote.sub_id).to.eql(pm.collectionVariables.get(\"sub_id\"));",
+                                    "    pm.expect(vote.value).to.eql(1);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "x-api-key",
+                                "value": "{{cat_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"image_id\": \"{{image_id}}\",\n    \"sub_id\": \"{{sub_id}}\",\n    \"value\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": "{{cat_base_url}}/votes"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "05 - Verify vote in votes list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "const votes = pm.response.json();",
+                                    "const voteId = Number(pm.collectionVariables.get(\"vote_id\"));",
+                                    "const vote = votes.find((item) => Number(item.id) === voteId);",
+                                    "",
+                                    "pm.test(\"Created vote is returned by /votes\", function () {",
+                                    "    pm.expect(votes).to.be.an(\"array\");",
+                                    "    pm.expect(vote).to.not.equal(undefined);",
+                                    "    pm.expect(vote.image_id).to.eql(pm.collectionVariables.get(\"image_id\"));",
+                                    "    pm.expect(vote.sub_id).to.eql(pm.collectionVariables.get(\"sub_id\"));",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "x-api-key",
+                                "value": "{{cat_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{cat_base_url}}/votes?sub_id={{sub_id}}&limit=100"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "06 - Create favourite for same image",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "const favourite = pm.response.json();",
+                                    "pm.collectionVariables.set(\"favourite_id\", String(favourite.id));",
+                                    "",
+                                    "pm.test(\"Favourite was created\", function () {",
+                                    "    pm.expect(favourite.id).to.be.a(\"number\");",
+                                    "    pm.expect(favourite.message).to.match(/success/i);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "x-api-key",
+                                "value": "{{cat_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"image_id\": \"{{image_id}}\",\n    \"sub_id\": \"{{sub_id}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": "{{cat_base_url}}/favourites"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "07 - Get favourite by id",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "const favourite = pm.response.json();",
+                                    "",
+                                    "pm.test(\"Favourite details link to selected image and sub_id\", function () {",
+                                    "    pm.expect(favourite.image_id).to.eql(pm.collectionVariables.get(\"image_id\"));",
+                                    "    pm.expect(favourite.sub_id).to.eql(pm.collectionVariables.get(\"sub_id\"));",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "x-api-key",
+                                "value": "{{cat_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{cat_base_url}}/favourites/{{favourite_id}}"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "08 - Verify favourite in favourites list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "const favourites = pm.response.json();",
+                                    "const favouriteId = Number(pm.collectionVariables.get(\"favourite_id\"));",
+                                    "const favourite = favourites.find((item) => Number(item.id) === favouriteId);",
+                                    "",
+                                    "pm.test(\"Created favourite is returned by /favourites\", function () {",
+                                    "    pm.expect(favourites).to.be.an(\"array\");",
+                                    "    pm.expect(favourite).to.not.equal(undefined);",
+                                    "    pm.expect(favourite.image_id).to.eql(pm.collectionVariables.get(\"image_id\"));",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "x-api-key",
+                                "value": "{{cat_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{cat_base_url}}/favourites?sub_id={{sub_id}}&limit=100"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "09 - Cleanup favourite",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Favourite cleanup succeeds\", function () {",
+                                    "    pm.expect([200, 204]).to.include(pm.response.code);",
+                                    "});",
+                                    "",
+                                    "pm.collectionVariables.unset(\"favourite_id\");"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "x-api-key",
+                                "value": "{{cat_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{cat_base_url}}/favourites/{{favourite_id}}"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "10 - Cleanup vote",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Vote cleanup succeeds\", function () {",
+                                    "    pm.expect([200, 204]).to.include(pm.response.code);",
+                                    "});",
+                                    "",
+                                    "pm.collectionVariables.unset(\"vote_id\");"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "x-api-key",
+                                "value": "{{cat_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{cat_base_url}}/votes/{{vote_id}}"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Petstore Store Order Smoke Scenario",
+            "description": "Executable Postman scenario for POST /v2/store/order. Consumer/provider contract verification is covered by Pact tests in the repository.",
+            "item": [
+                {
+                    "name": "01 - Place store order",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": ["pm.collectionVariables.set(\"ship_date\", new Date().toISOString());"]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "const order = pm.response.json();",
+                                    "",
+                                    "pm.test(\"Order response matches request contract fields\", function () {",
+                                    "    pm.expect(order.id).to.eql(Number(pm.collectionVariables.get(\"order_id\")));",
+                                    "    pm.expect(order.petId).to.eql(Number(pm.collectionVariables.get(\"pet_id\")));",
+                                    "    pm.expect(order.quantity).to.eql(Number(pm.collectionVariables.get(\"quantity\")));",
+                                    "    pm.expect(order.status).to.eql(pm.collectionVariables.get(\"order_status\"));",
+                                    "    pm.expect(order.complete).to.eql(pm.collectionVariables.get(\"order_complete\") === \"true\");",
+                                    "    pm.expect(order.shipDate).to.be.a(\"string\").and.not.empty;",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": {{order_id}},\n    \"petId\": {{pet_id}},\n    \"quantity\": {{quantity}},\n    \"shipDate\": \"{{ship_date}}\",\n    \"status\": \"{{order_status}}\",\n    \"complete\": {{order_complete}}\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": "{{petstore_base_url}}/store/order"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "cat_base_url",
+            "value": "https://api.thecatapi.com/v1",
+            "type": "string"
+        },
+        {
+            "key": "petstore_base_url",
+            "value": "https://petstore.swagger.io/v2",
+            "type": "string"
+        },
+        {
+            "key": "cat_api_key",
+            "value": "",
+            "type": "secret"
+        },
+        {
+            "key": "breed_query",
+            "value": "siberian",
+            "type": "string"
+        },
+        {
+            "key": "breed_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "breed_name",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "image_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "image_url",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "sub_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "vote_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "favourite_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "order_id",
+            "value": "10",
+            "type": "string"
+        },
+        {
+            "key": "pet_id",
+            "value": "198772",
+            "type": "string"
+        },
+        {
+            "key": "quantity",
+            "value": "2",
+            "type": "string"
+        },
+        {
+            "key": "order_status",
+            "value": "placed",
+            "type": "string"
+        },
+        {
+            "key": "order_complete",
+            "value": "false",
+            "type": "string"
+        },
+        {
+            "key": "ship_date",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

@@ -1,0 +1,34 @@
+{
+  "name": "lesson13-api-integration-contract-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Lesson 13 homework: Cat API integration tests and Petstore Pact contract tests.",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "npm run test:contract && npm run test:integration",
+    "test:integration": "mocha \"tests/integration/**/*.spec.ts\"",
+    "test:contract": "npm run test:contract:consumer && npm run test:contract:provider",
+    "test:contract:consumer": "mocha \"tests/contracts/**/*.consumer.pact.spec.ts\"",
+    "test:contract:provider": "mocha \"tests/contracts/**/*.provider.pact.spec.ts\"",
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --fix",
+    "format": "prettier --write \"{src,tests}/**/*.ts\" \"postman/**/*.json\" \"*.md\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@pact-foundation/pact": "^16.5.0",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.0.0",
+    "chai": "^6.2.2",
+    "eslint": "^10.5.0",
+    "eslint-plugin-unicorn": "^66.0.0",
+    "mocha": "^11.7.6",
+    "prettier": "^3.8.3",
+    "tsx": "^4.22.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.61.0"
+  }
+}
