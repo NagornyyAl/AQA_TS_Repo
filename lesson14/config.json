@@ -1,0 +1,10 @@
+{
+  "api": {
+    "officialJokeApi": {
+      "baseUrl": "https://official-joke-api.appspot.com"
+    }
+  },
+  "request": {
+    "timeoutMs": 5000
+  }
+}
