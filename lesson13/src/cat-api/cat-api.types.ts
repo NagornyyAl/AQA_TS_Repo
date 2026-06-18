@@ -1,9 +1,50 @@
+export interface CatBreedWeight {
+    imperial: string;
+    metric: string;
+}
+
+export interface CatImageSummary {
+    id: string;
+    url: string;
+    width?: number;
+    height?: number;
+}
+
 export interface CatBreed {
+    weight: CatBreedWeight;
     id: string;
     name: string;
-    temperament?: string;
-    reference_image_id?: string;
-    image?: CatImage;
+    temperament: string;
+    origin: string;
+    country_codes: string;
+    country_code: string;
+    description: string;
+    life_span: string;
+    indoor: number;
+    lap?: number;
+    adaptability: number;
+    affection_level: number;
+    child_friendly: number;
+    dog_friendly: number;
+    energy_level: number;
+    grooming: number;
+    health_issues: number;
+    intelligence: number;
+    shedding_level: number;
+    social_needs: number;
+    stranger_friendly: number;
+    vocalisation: number;
+    experimental: number;
+    hairless: number;
+    natural: number;
+    rare: number;
+    rex: number;
+    suppressed_tail: number;
+    short_legs: number;
+    wikipedia_url?: string;
+    hypoallergenic: number;
+    reference_image_id: string;
+    image?: CatImageSummary;
 }
 
 export interface CatImage {
@@ -27,7 +68,7 @@ export interface CatVote {
     sub_id: string;
     value: number;
     country_code?: string;
-    image?: Partial<CatImage>;
+    image?: CatImageSummary;
 }
 
 export interface CreateFavouriteRequest {
@@ -46,5 +87,5 @@ export interface CatFavourite {
     image_id: string;
     sub_id?: string;
     created_at?: string;
-    image?: Partial<CatImage>;
+    image?: CatImageSummary;
 }

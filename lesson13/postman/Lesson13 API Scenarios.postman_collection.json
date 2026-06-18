@@ -8,15 +8,15 @@
     "item": [
         {
             "name": "Cat API Integration Flow",
-            "description": "Sequential flow: breeds -> images -> votes -> favourites -> cleanup.",
+            "description": "Sequential integration flow: breeds -> images -> votes -> favourites -> cleanup.",
             "event": [
                 {
                     "listen": "prerequest",
                     "script": {
                         "type": "text/javascript",
                         "exec": [
-                            "if (!pm.variables.get(\"cat_api_key\")) {",
-                            "    throw new Error(\"Set cat_api_key in Postman environment or collection variables before running Cat API flow.\");",
+                            "if (!pm.variables.get('cat_api_key')) {",
+                            "    throw new Error('Set cat_api_key in Postman environment or collection variables before running Cat API flow.');",
                             "}"
                         ]
                     }
@@ -24,19 +24,15 @@
             ],
             "item": [
                 {
-                    "name": "01 - Search breed and prepare run data",
+                    "name": "01 - Search breed and validate breed contract",
                     "event": [
                         {
                             "listen": "prerequest",
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.collectionVariables.set(\"sub_id\", \"lesson13-postman-\" + Date.now());",
-                                    "pm.collectionVariables.unset(\"breed_id\");",
-                                    "pm.collectionVariables.unset(\"breed_name\");",
-                                    "pm.collectionVariables.unset(\"image_id\");",
-                                    "pm.collectionVariables.unset(\"vote_id\");",
-                                    "pm.collectionVariables.unset(\"favourite_id\");"
+                                    "pm.collectionVariables.set('sub_id', 'lesson13-postman-' + Date.now());",
+                                    "['breed_id', 'breed_name', 'breed_origin', 'breed_reference_image_id', 'breed_payload', 'image_id', 'image_url', 'vote_id', 'favourite_id'].forEach((key) => pm.collectionVariables.unset(key));"
                                 ]
                             }
                         },
@@ -45,24 +41,48 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test(\"Status code is 200\", function () {",
+                                    "function expectBreedContract(breed) {",
+                                    "    pm.expect(breed.id).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.name).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.temperament).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.origin).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.country_codes).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.country_code).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.description).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.life_span).to.match(/^\\d+\\s-\\s\\d+$/);",
+                                    "    pm.expect(breed.reference_image_id).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.weight.imperial).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.weight.metric).to.be.a('string').and.not.empty;",
+                                    "    ['adaptability', 'affection_level', 'child_friendly', 'dog_friendly', 'energy_level', 'grooming', 'health_issues', 'intelligence', 'shedding_level', 'social_needs', 'stranger_friendly', 'vocalisation'].forEach((field) => {",
+                                    "        pm.expect(breed[field], field).to.be.a('number').and.within(1, 5);",
+                                    "    });",
+                                    "    ['indoor', 'experimental', 'hairless', 'natural', 'rare', 'rex', 'suppressed_tail', 'short_legs', 'hypoallergenic'].forEach((field) => {",
+                                    "        pm.expect(breed[field], field).to.be.a('number').and.within(0, 1);",
+                                    "    });",
+                                    "}",
+                                    "",
+                                    "pm.test('Status code is 200', function () {",
                                     "    pm.response.to.have.status(200);",
                                     "});",
                                     "",
                                     "const breeds = pm.response.json();",
+                                    "const selectedBreed = breeds.find((breed) => breed.id === 'sibe') || breeds[0];",
                                     "",
-                                    "pm.test(\"At least one breed is returned\", function () {",
-                                    "    pm.expect(breeds).to.be.an(\"array\").and.not.empty;",
+                                    "pm.test('Breed search returns rich breed data', function () {",
+                                    "    pm.expect(breeds).to.be.an('array').and.not.empty;",
+                                    "    expectBreedContract(selectedBreed);",
+                                    "    pm.expect(selectedBreed.image).to.be.an('object');",
+                                    "    pm.expect(selectedBreed.image.id).to.eql(selectedBreed.reference_image_id);",
+                                    "    pm.expect(selectedBreed.image.url).to.match(/^https:\\/\\//);",
+                                    "    pm.expect(selectedBreed.image.width).to.be.a('number').and.greaterThan(0);",
+                                    "    pm.expect(selectedBreed.image.height).to.be.a('number').and.greaterThan(0);",
                                     "});",
                                     "",
-                                    "const selectedBreed = breeds.find((breed) => breed.id === \"sibe\") || breeds[0];",
-                                    "pm.collectionVariables.set(\"breed_id\", selectedBreed.id);",
-                                    "pm.collectionVariables.set(\"breed_name\", selectedBreed.name);",
-                                    "",
-                                    "pm.test(\"Selected breed has id and name\", function () {",
-                                    "    pm.expect(selectedBreed.id).to.be.a(\"string\").and.not.empty;",
-                                    "    pm.expect(selectedBreed.name).to.be.a(\"string\").and.not.empty;",
-                                    "});"
+                                    "pm.collectionVariables.set('breed_id', selectedBreed.id);",
+                                    "pm.collectionVariables.set('breed_name', selectedBreed.name);",
+                                    "pm.collectionVariables.set('breed_origin', selectedBreed.origin);",
+                                    "pm.collectionVariables.set('breed_reference_image_id', selectedBreed.reference_image_id);",
+                                    "pm.collectionVariables.set('breed_payload', JSON.stringify(selectedBreed));"
                                 ]
                             }
                         }
@@ -86,22 +106,43 @@
                     "response": []
                 },
                 {
-                    "name": "02 - Get selected breed by id",
+                    "name": "02 - Get selected breed by id and compare fields",
                     "event": [
                         {
                             "listen": "test",
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test(\"Status code is 200\", function () {",
+                                    "function expectBreedContract(breed) {",
+                                    "    pm.expect(breed.id).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.name).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.temperament).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.origin).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.country_codes).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.country_code).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.description).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.life_span).to.match(/^\\d+\\s-\\s\\d+$/);",
+                                    "    pm.expect(breed.reference_image_id).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.weight.imperial).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(breed.weight.metric).to.be.a('string').and.not.empty;",
+                                    "}",
+                                    "",
+                                    "pm.test('Status code is 200', function () {",
                                     "    pm.response.to.have.status(200);",
                                     "});",
                                     "",
-                                    "const breed = pm.response.json();",
+                                    "const expectedBreed = JSON.parse(pm.collectionVariables.get('breed_payload'));",
+                                    "const actualBreed = pm.response.json();",
                                     "",
-                                    "pm.test(\"Breed details match selected breed\", function () {",
-                                    "    pm.expect(breed.id).to.eql(pm.collectionVariables.get(\"breed_id\"));",
-                                    "    pm.expect(breed.name).to.eql(pm.collectionVariables.get(\"breed_name\"));",
+                                    "pm.test('Breed details preserve key fields from breed search', function () {",
+                                    "    expectBreedContract(actualBreed);",
+                                    "    pm.expect(actualBreed.id).to.eql(expectedBreed.id);",
+                                    "    pm.expect(actualBreed.name).to.eql(expectedBreed.name);",
+                                    "    pm.expect(actualBreed.temperament).to.eql(expectedBreed.temperament);",
+                                    "    pm.expect(actualBreed.origin).to.eql(expectedBreed.origin);",
+                                    "    pm.expect(actualBreed.description).to.eql(expectedBreed.description);",
+                                    "    pm.expect(actualBreed.life_span).to.eql(expectedBreed.life_span);",
+                                    "    pm.expect(actualBreed.reference_image_id).to.eql(expectedBreed.reference_image_id);",
                                     "});"
                                 ]
                             }
@@ -126,30 +167,38 @@
                     "response": []
                 },
                 {
-                    "name": "03 - Search image for selected breed",
+                    "name": "03 - Search image for selected breed and validate embedded breed",
                     "event": [
                         {
                             "listen": "test",
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test(\"Status code is 200\", function () {",
+                                    "pm.test('Status code is 200', function () {",
                                     "    pm.response.to.have.status(200);",
                                     "});",
                                     "",
+                                    "const expectedBreed = JSON.parse(pm.collectionVariables.get('breed_payload'));",
                                     "const images = pm.response.json();",
                                     "const image = images[0];",
-                                    "const breedId = pm.collectionVariables.get(\"breed_id\");",
+                                    "const imageBreed = image && image.breeds.find((breed) => breed.id === expectedBreed.id);",
                                     "",
-                                    "pm.test(\"Image for selected breed is returned\", function () {",
-                                    "    pm.expect(images).to.be.an(\"array\").and.not.empty;",
-                                    "    pm.expect(image.id).to.be.a(\"string\").and.not.empty;",
+                                    "pm.test('Image response contains real image and full selected breed object', function () {",
+                                    "    pm.expect(images).to.be.an('array').and.not.empty;",
+                                    "    pm.expect(image.id).to.be.a('string').and.not.empty;",
                                     "    pm.expect(image.url).to.match(/^https:\\/\\//);",
-                                    "    pm.expect(image.breeds.some((breed) => breed.id === breedId)).to.eql(true);",
+                                    "    pm.expect(image.width).to.be.a('number').and.greaterThan(0);",
+                                    "    pm.expect(image.height).to.be.a('number').and.greaterThan(0);",
+                                    "    pm.expect(imageBreed).to.be.an('object');",
+                                    "    pm.expect(imageBreed.name).to.eql(expectedBreed.name);",
+                                    "    pm.expect(imageBreed.origin).to.eql(expectedBreed.origin);",
+                                    "    pm.expect(imageBreed.temperament).to.eql(expectedBreed.temperament);",
+                                    "    pm.expect(imageBreed.description).to.eql(expectedBreed.description);",
+                                    "    pm.expect(imageBreed.reference_image_id).to.eql(expectedBreed.reference_image_id);",
                                     "});",
                                     "",
-                                    "pm.collectionVariables.set(\"image_id\", image.id);",
-                                    "pm.collectionVariables.set(\"image_url\", image.url);"
+                                    "pm.collectionVariables.set('image_id', image.id);",
+                                    "pm.collectionVariables.set('image_url', image.url);"
                                 ]
                             }
                         }
@@ -180,17 +229,17 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test(\"Status code is 201\", function () {",
+                                    "pm.test('Status code is 201', function () {",
                                     "    pm.response.to.have.status(201);",
                                     "});",
                                     "",
                                     "const vote = pm.response.json();",
-                                    "pm.collectionVariables.set(\"vote_id\", String(vote.id));",
+                                    "pm.collectionVariables.set('vote_id', String(vote.id));",
                                     "",
-                                    "pm.test(\"Vote links to selected image and sub_id\", function () {",
-                                    "    pm.expect(vote.id).to.be.a(\"number\");",
-                                    "    pm.expect(vote.image_id).to.eql(pm.collectionVariables.get(\"image_id\"));",
-                                    "    pm.expect(vote.sub_id).to.eql(pm.collectionVariables.get(\"sub_id\"));",
+                                    "pm.test('Vote links to selected image and sub_id', function () {",
+                                    "    pm.expect(vote.id).to.be.a('number');",
+                                    "    pm.expect(vote.image_id).to.eql(pm.collectionVariables.get('image_id'));",
+                                    "    pm.expect(vote.sub_id).to.eql(pm.collectionVariables.get('sub_id'));",
                                     "    pm.expect(vote.value).to.eql(1);",
                                     "});"
                                 ]
@@ -230,26 +279,29 @@
                     "response": []
                 },
                 {
-                    "name": "05 - Verify vote in votes list",
+                    "name": "05 - Verify vote in votes list with linked image",
                     "event": [
                         {
                             "listen": "test",
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test(\"Status code is 200\", function () {",
+                                    "pm.test('Status code is 200', function () {",
                                     "    pm.response.to.have.status(200);",
                                     "});",
                                     "",
                                     "const votes = pm.response.json();",
-                                    "const voteId = Number(pm.collectionVariables.get(\"vote_id\"));",
+                                    "const voteId = Number(pm.collectionVariables.get('vote_id'));",
                                     "const vote = votes.find((item) => Number(item.id) === voteId);",
                                     "",
-                                    "pm.test(\"Created vote is returned by /votes\", function () {",
-                                    "    pm.expect(votes).to.be.an(\"array\");",
-                                    "    pm.expect(vote).to.not.equal(undefined);",
-                                    "    pm.expect(vote.image_id).to.eql(pm.collectionVariables.get(\"image_id\"));",
-                                    "    pm.expect(vote.sub_id).to.eql(pm.collectionVariables.get(\"sub_id\"));",
+                                    "pm.test('Created vote returns linked image object', function () {",
+                                    "    pm.expect(votes).to.be.an('array');",
+                                    "    pm.expect(vote).to.be.an('object');",
+                                    "    pm.expect(vote.image_id).to.eql(pm.collectionVariables.get('image_id'));",
+                                    "    pm.expect(vote.sub_id).to.eql(pm.collectionVariables.get('sub_id'));",
+                                    "    pm.expect(vote.image).to.be.an('object');",
+                                    "    pm.expect(vote.image.id).to.eql(pm.collectionVariables.get('image_id'));",
+                                    "    pm.expect(vote.image.url).to.eql(pm.collectionVariables.get('image_url'));",
                                     "});"
                                 ]
                             }
@@ -281,15 +333,15 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test(\"Status code is 200\", function () {",
+                                    "pm.test('Status code is 200', function () {",
                                     "    pm.response.to.have.status(200);",
                                     "});",
                                     "",
                                     "const favourite = pm.response.json();",
-                                    "pm.collectionVariables.set(\"favourite_id\", String(favourite.id));",
+                                    "pm.collectionVariables.set('favourite_id', String(favourite.id));",
                                     "",
-                                    "pm.test(\"Favourite was created\", function () {",
-                                    "    pm.expect(favourite.id).to.be.a(\"number\");",
+                                    "pm.test('Favourite was created', function () {",
+                                    "    pm.expect(favourite.id).to.be.a('number');",
                                     "    pm.expect(favourite.message).to.match(/success/i);",
                                     "});"
                                 ]
@@ -329,22 +381,25 @@
                     "response": []
                 },
                 {
-                    "name": "07 - Get favourite by id",
+                    "name": "07 - Get favourite by id with linked image",
                     "event": [
                         {
                             "listen": "test",
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test(\"Status code is 200\", function () {",
+                                    "pm.test('Status code is 200', function () {",
                                     "    pm.response.to.have.status(200);",
                                     "});",
                                     "",
                                     "const favourite = pm.response.json();",
                                     "",
-                                    "pm.test(\"Favourite details link to selected image and sub_id\", function () {",
-                                    "    pm.expect(favourite.image_id).to.eql(pm.collectionVariables.get(\"image_id\"));",
-                                    "    pm.expect(favourite.sub_id).to.eql(pm.collectionVariables.get(\"sub_id\"));",
+                                    "pm.test('Favourite details return linked image object', function () {",
+                                    "    pm.expect(favourite.image_id).to.eql(pm.collectionVariables.get('image_id'));",
+                                    "    pm.expect(favourite.sub_id).to.eql(pm.collectionVariables.get('sub_id'));",
+                                    "    pm.expect(favourite.image).to.be.an('object');",
+                                    "    pm.expect(favourite.image.id).to.eql(pm.collectionVariables.get('image_id'));",
+                                    "    pm.expect(favourite.image.url).to.eql(pm.collectionVariables.get('image_url'));",
                                     "});"
                                 ]
                             }
@@ -369,25 +424,29 @@
                     "response": []
                 },
                 {
-                    "name": "08 - Verify favourite in favourites list",
+                    "name": "08 - Verify favourite in favourites list with linked image",
                     "event": [
                         {
                             "listen": "test",
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test(\"Status code is 200\", function () {",
+                                    "pm.test('Status code is 200', function () {",
                                     "    pm.response.to.have.status(200);",
                                     "});",
                                     "",
                                     "const favourites = pm.response.json();",
-                                    "const favouriteId = Number(pm.collectionVariables.get(\"favourite_id\"));",
+                                    "const favouriteId = Number(pm.collectionVariables.get('favourite_id'));",
                                     "const favourite = favourites.find((item) => Number(item.id) === favouriteId);",
                                     "",
-                                    "pm.test(\"Created favourite is returned by /favourites\", function () {",
-                                    "    pm.expect(favourites).to.be.an(\"array\");",
-                                    "    pm.expect(favourite).to.not.equal(undefined);",
-                                    "    pm.expect(favourite.image_id).to.eql(pm.collectionVariables.get(\"image_id\"));",
+                                    "pm.test('Created favourite returns linked image object', function () {",
+                                    "    pm.expect(favourites).to.be.an('array');",
+                                    "    pm.expect(favourite).to.be.an('object');",
+                                    "    pm.expect(favourite.image_id).to.eql(pm.collectionVariables.get('image_id'));",
+                                    "    pm.expect(favourite.sub_id).to.eql(pm.collectionVariables.get('sub_id'));",
+                                    "    pm.expect(favourite.image).to.be.an('object');",
+                                    "    pm.expect(favourite.image.id).to.eql(pm.collectionVariables.get('image_id'));",
+                                    "    pm.expect(favourite.image.url).to.eql(pm.collectionVariables.get('image_url'));",
                                     "});"
                                 ]
                             }
@@ -419,11 +478,11 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test(\"Favourite cleanup succeeds\", function () {",
+                                    "pm.test('Favourite cleanup succeeds', function () {",
                                     "    pm.expect([200, 204]).to.include(pm.response.code);",
                                     "});",
                                     "",
-                                    "pm.collectionVariables.unset(\"favourite_id\");"
+                                    "pm.collectionVariables.unset('favourite_id');"
                                 ]
                             }
                         }
@@ -454,11 +513,11 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test(\"Vote cleanup succeeds\", function () {",
+                                    "pm.test('Vote cleanup succeeds', function () {",
                                     "    pm.expect([200, 204]).to.include(pm.response.code);",
                                     "});",
                                     "",
-                                    "pm.collectionVariables.unset(\"vote_id\");"
+                                    "pm.collectionVariables.unset('vote_id');"
                                 ]
                             }
                         }
@@ -494,7 +553,7 @@
                             "listen": "prerequest",
                             "script": {
                                 "type": "text/javascript",
-                                "exec": ["pm.collectionVariables.set(\"ship_date\", new Date().toISOString());"]
+                                "exec": ["pm.collectionVariables.set('ship_date', new Date().toISOString());"]
                             }
                         },
                         {
@@ -502,19 +561,19 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test(\"Status code is 200\", function () {",
+                                    "pm.test('Status code is 200', function () {",
                                     "    pm.response.to.have.status(200);",
                                     "});",
                                     "",
                                     "const order = pm.response.json();",
                                     "",
-                                    "pm.test(\"Order response matches request contract fields\", function () {",
-                                    "    pm.expect(order.id).to.eql(Number(pm.collectionVariables.get(\"order_id\")));",
-                                    "    pm.expect(order.petId).to.eql(Number(pm.collectionVariables.get(\"pet_id\")));",
-                                    "    pm.expect(order.quantity).to.eql(Number(pm.collectionVariables.get(\"quantity\")));",
-                                    "    pm.expect(order.status).to.eql(pm.collectionVariables.get(\"order_status\"));",
-                                    "    pm.expect(order.complete).to.eql(pm.collectionVariables.get(\"order_complete\") === \"true\");",
-                                    "    pm.expect(order.shipDate).to.be.a(\"string\").and.not.empty;",
+                                    "pm.test('Order response matches request contract fields', function () {",
+                                    "    pm.expect(order.id).to.eql(Number(pm.collectionVariables.get('order_id')));",
+                                    "    pm.expect(order.petId).to.eql(Number(pm.collectionVariables.get('pet_id')));",
+                                    "    pm.expect(order.quantity).to.eql(Number(pm.collectionVariables.get('quantity')));",
+                                    "    pm.expect(order.status).to.eql(pm.collectionVariables.get('order_status'));",
+                                    "    pm.expect(order.complete).to.eql(pm.collectionVariables.get('order_complete') === 'true');",
+                                    "    pm.expect(order.shipDate).to.be.a('string').and.not.empty;",
                                     "});"
                                 ]
                             }
@@ -572,41 +631,6 @@
             "type": "string"
         },
         {
-            "key": "breed_id",
-            "value": "",
-            "type": "string"
-        },
-        {
-            "key": "breed_name",
-            "value": "",
-            "type": "string"
-        },
-        {
-            "key": "image_id",
-            "value": "",
-            "type": "string"
-        },
-        {
-            "key": "image_url",
-            "value": "",
-            "type": "string"
-        },
-        {
-            "key": "sub_id",
-            "value": "",
-            "type": "string"
-        },
-        {
-            "key": "vote_id",
-            "value": "",
-            "type": "string"
-        },
-        {
-            "key": "favourite_id",
-            "value": "",
-            "type": "string"
-        },
-        {
             "key": "order_id",
             "value": "10",
             "type": "string"
@@ -629,11 +653,6 @@
         {
             "key": "order_complete",
             "value": "false",
-            "type": "string"
-        },
-        {
-            "key": "ship_date",
-            "value": "",
             "type": "string"
         }
     ]

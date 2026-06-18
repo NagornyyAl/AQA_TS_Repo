@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { expect } from 'chai';
 import { CatApiClient } from '../../src/cat-api/cat-api-client';
-import { CatFavourite, CatVote } from '../../src/cat-api/cat-api.types';
+import { CatBreed, CatFavourite, CatImage, CatImageSummary, CatVote } from '../../src/cat-api/cat-api.types';
 import { loadLocalEnv } from '../../src/shared/load-local-env';
 
 loadLocalEnv();
@@ -43,12 +43,19 @@ describeWithCatApiKey(suiteName, () => {
         const breed = breeds.find((item) => item.id === 'sibe') ?? breeds[0];
 
         expect(breed, 'expected at least one Siberian breed result').to.not.equal(undefined);
-        expect(breed.id).to.be.a('string').and.not.empty;
+        expectBreedContract(breed);
+        expectReferenceImageContract(breed);
 
         const directBreed = await client.getBreed(breed.id);
 
         expect(directBreed.id).to.equal(breed.id);
         expect(directBreed.name).to.equal(breed.name);
+        expect(directBreed.temperament).to.equal(breed.temperament);
+        expect(directBreed.origin).to.equal(breed.origin);
+        expect(directBreed.description).to.equal(breed.description);
+        expect(directBreed.life_span).to.equal(breed.life_span);
+        expect(directBreed.reference_image_id).to.equal(breed.reference_image_id);
+        expectBreedContract(directBreed);
 
         const images = await client.searchImages({
             breedIds: breed.id,
@@ -58,9 +65,15 @@ describeWithCatApiKey(suiteName, () => {
         const image = images[0];
 
         expect(image, `expected an image for breed ${breed.id}`).to.not.equal(undefined);
-        expect(image.id).to.be.a('string').and.not.empty;
-        expect(image.url).to.match(/^https:\/\//);
-        expect(image.breeds.some((imageBreed) => imageBreed.id === breed.id)).to.equal(true);
+        expectImageContract(image);
+
+        const imageBreed = image.breeds.find((item) => item.id === breed.id);
+
+        expect(imageBreed, `expected image ${image.id} to include breed ${breed.id}`).to.not.equal(undefined);
+        expectBreedContract(imageBreed as CatBreed);
+        expect(imageBreed?.name).to.equal(breed.name);
+        expect(imageBreed?.origin).to.equal(breed.origin);
+        expect(imageBreed?.reference_image_id).to.equal(breed.reference_image_id);
 
         const createdVote = await client.createVote({
             image_id: image.id,
@@ -82,6 +95,7 @@ describeWithCatApiKey(suiteName, () => {
         expect(persistedVote, `expected vote ${createdVote.id} to be returned by /votes`).to.not.equal(undefined);
         expect(persistedVote?.image_id).to.equal(image.id);
         expect(persistedVote?.sub_id).to.equal(subId);
+        expectLinkedImageContract(persistedVote?.image, image);
 
         const createdFavourite = await client.createFavourite({
             image_id: image.id,
@@ -96,6 +110,7 @@ describeWithCatApiKey(suiteName, () => {
 
         expect(favouriteDetails.image_id).to.equal(image.id);
         expect(favouriteDetails.sub_id).to.equal(subId);
+        expectLinkedImageContract(favouriteDetails.image, image);
 
         const favourites = await client.listFavourites(subId);
         const persistedFavourite = findById(favourites, createdFavourite.id);
@@ -105,9 +120,78 @@ describeWithCatApiKey(suiteName, () => {
             `expected favourite ${createdFavourite.id} to be returned by /favourites`
         ).to.not.equal(undefined);
         expect(persistedFavourite?.image_id).to.equal(image.id);
+        expect(persistedFavourite?.sub_id).to.equal(subId);
+        expectLinkedImageContract(persistedFavourite?.image, image);
     });
 });
 
 function findById<T extends CatVote | CatFavourite>(items: T[], id: number): T | undefined {
     return items.find((item) => item.id === id);
+}
+
+function expectBreedContract(breed: CatBreed): void {
+    expect(breed.id).to.be.a('string').and.not.empty;
+    expect(breed.name).to.be.a('string').and.not.empty;
+    expect(breed.temperament).to.be.a('string').and.not.empty;
+    expect(breed.origin).to.be.a('string').and.not.empty;
+    expect(breed.country_codes).to.be.a('string').and.not.empty;
+    expect(breed.country_code).to.be.a('string').and.not.empty;
+    expect(breed.description).to.be.a('string').and.not.empty;
+    expect(breed.life_span).to.match(/^\d+\s-\s\d+$/);
+    expect(breed.reference_image_id).to.be.a('string').and.not.empty;
+    expect(breed.weight.imperial).to.be.a('string').and.not.empty;
+    expect(breed.weight.metric).to.be.a('string').and.not.empty;
+
+    for (const score of [
+        breed.adaptability,
+        breed.affection_level,
+        breed.child_friendly,
+        breed.dog_friendly,
+        breed.energy_level,
+        breed.grooming,
+        breed.health_issues,
+        breed.intelligence,
+        breed.shedding_level,
+        breed.social_needs,
+        breed.stranger_friendly,
+        breed.vocalisation
+    ]) {
+        expect(score).to.be.a('number').and.greaterThanOrEqual(1).and.lessThanOrEqual(5);
+    }
+
+    for (const flag of [
+        breed.indoor,
+        breed.experimental,
+        breed.hairless,
+        breed.natural,
+        breed.rare,
+        breed.rex,
+        breed.suppressed_tail,
+        breed.short_legs,
+        breed.hypoallergenic
+    ]) {
+        expect(flag).to.be.a('number').and.greaterThanOrEqual(0).and.lessThanOrEqual(1);
+    }
+}
+
+function expectReferenceImageContract(breed: CatBreed): void {
+    expect(breed.image, `expected /breeds/search result for ${breed.id} to include image`).to.not.equal(undefined);
+    expect(breed.image?.id).to.equal(breed.reference_image_id);
+    expect(breed.image?.url).to.match(/^https:\/\//);
+    expect(breed.image?.width).to.be.a('number').and.greaterThan(0);
+    expect(breed.image?.height).to.be.a('number').and.greaterThan(0);
+}
+
+function expectImageContract(image: CatImage): void {
+    expect(image.id).to.be.a('string').and.not.empty;
+    expect(image.url).to.match(/^https:\/\//);
+    expect(image.width).to.be.a('number').and.greaterThan(0);
+    expect(image.height).to.be.a('number').and.greaterThan(0);
+    expect(image.breeds).to.be.an('array').and.not.empty;
+}
+
+function expectLinkedImageContract(actualImage: CatImageSummary | undefined, expectedImage: CatImage): void {
+    expect(actualImage, `expected read endpoint to return linked image ${expectedImage.id}`).to.not.equal(undefined);
+    expect(actualImage?.id).to.equal(expectedImage.id);
+    expect(actualImage?.url).to.equal(expectedImage.url);
 }
