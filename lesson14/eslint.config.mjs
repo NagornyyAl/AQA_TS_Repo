@@ -1,41 +1,62 @@
+import stylistic from '@stylistic/eslint-plugin';
 import eslint from '@eslint/js';
-import globals from 'globals';
-import tseslint from 'typescript-eslint';
+import tsEslint from 'typescript-eslint';
+import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 
-export default tseslint.config(
-  {
-    ignores: [
-      'node_modules/**',
-      'coverage/**',
-      'dist/**',
-      'build/**'
-    ]
-  },
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
-  {
-    files: ['src/**/*.ts', 'tests/**/*.ts', 'vitest.config.ts'],
+export default tsEslint.config({
+    files: ['**/*.ts'],
     languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.vitest
-      }
+        parserOptions: {
+            project: true,
+            tsconfigRootDir: process.cwd(),
+        },
     },
+    plugins: {
+        '@stylistic': stylistic,
+        unicorn: eslintPluginUnicorn
+    },
+    extends: [eslint.configs.recommended, ...tsEslint.configs.recommended, ...tsEslint.configs.stylistic],
     rules: {
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        {
-          prefer: 'type-imports'
-        }
-      ],
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_'
-        }
-      ]
+        'no-unused-expressions': 'off',
+        '@typescript-eslint/no-unused-expressions': ['off'],
+        '@typescript-eslint/consistent-indexed-object-style': 'off',
+        '@typescript-eslint/no-explicit-any': 'warn',
+        '@typescript-eslint/explicit-member-accessibility': 'error',
+        '@typescript-eslint/no-shadow': 'error',
+        '@typescript-eslint/require-await': 'error',
+        '@typescript-eslint/explicit-function-return-type': [
+            'error',
+            {
+                allowExpressions: true
+            }
+        ],
+        '@stylistic/indent': ['error', 4],
+        '@stylistic/max-len': [
+            'warn',
+            {
+                code: 140,
+                ignoreUrls: true,
+                ignoreStrings: true,
+                ignoreTemplateLiterals: true
+            }
+        ],
+        '@stylistic/brace-style': ['warn'],
+        '@stylistic/operator-linebreak': ['warn', 'after', { overrides: { '?': 'before', ':': 'before' } }],
+        '@stylistic/quotes': ['warn', 'single'],
+        '@stylistic/semi': ['error', 'always'],
+        '@stylistic/comma-dangle': ['error', 'never'],
+        '@stylistic/no-multiple-empty-lines': ['error', { max: 2 }],
+        '@stylistic/no-trailing-spaces': ['error', { skipBlankLines: false }],
+        '@stylistic/eol-last': ['error', 'always'],
+        '@stylistic/space-infix-ops': 'error',
+        '@stylistic/arrow-spacing': 'error',
+        '@stylistic/comma-spacing': ['error', { before: false, after: true }],
+        '@stylistic/keyword-spacing': ['error', { before: true, after: true }],
+        'unicorn/filename-case': [
+            'error',
+            {
+                case: 'kebabCase'
+            }
+        ],
     }
-  }
-);
+});

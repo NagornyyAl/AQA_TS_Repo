@@ -1,4 +1,4 @@
 export interface ApiErrorDto {
-  type: 'error';
-  message: string;
+    type: 'error';
+    message: string;
 }

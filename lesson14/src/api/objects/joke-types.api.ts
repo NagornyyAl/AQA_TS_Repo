@@ -3,9 +3,9 @@ import type { ApiResponse } from '../../framework/api-response';
 import type { ApiService } from '../../framework/api-service';
 
 export class JokeTypesApi {
-  public constructor(private readonly http: ApiService) {}
+    public constructor(private readonly http: ApiService) {}
 
-  public getTypes(): Promise<ApiResponse<JokeType[]>> {
-    return this.http.get<JokeType[]>('/types');
-  }
+    public getTypes(): Promise<ApiResponse<JokeType[]>> {
+        return this.http.get<JokeType[]>('/types');
+    }
 }

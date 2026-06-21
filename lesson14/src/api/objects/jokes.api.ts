@@ -4,29 +4,29 @@ import type { ApiResponse } from '../../framework/api-response';
 import type { ApiService } from '../../framework/api-service';
 
 export class JokesApi {
-  public constructor(private readonly http: ApiService) {}
+    public constructor(private readonly http: ApiService) {}
 
-  public getRandomJoke(): Promise<ApiResponse<JokeDto>> {
-    return this.http.get<JokeDto>('/jokes/random');
-  }
+    public getRandomJoke(): Promise<ApiResponse<JokeDto>> {
+        return this.http.get<JokeDto>('/jokes/random');
+    }
 
-  public getRandomJokes(count: number): Promise<ApiResponse<JokeDto[] | string>> {
-    return this.http.get<JokeDto[] | string>(`/jokes/random/${count}`);
-  }
+    public getRandomJokes(count: number): Promise<ApiResponse<JokeDto[] | string>> {
+        return this.http.get<JokeDto[] | string>(`/jokes/random/${count}`);
+    }
 
-  public getTenRandomJokes(): Promise<ApiResponse<JokeDto[]>> {
-    return this.http.get<JokeDto[]>('/jokes/ten');
-  }
+    public getTenRandomJokes(): Promise<ApiResponse<JokeDto[]>> {
+        return this.http.get<JokeDto[]>('/jokes/ten');
+    }
 
-  public getRandomJokeByType(type: JokeType): Promise<ApiResponse<JokeDto[]>> {
-    return this.http.get<JokeDto[]>(`/jokes/${type}/random`);
-  }
+    public getRandomJokeByType(type: JokeType): Promise<ApiResponse<JokeDto[]>> {
+        return this.http.get<JokeDto[]>(`/jokes/${type}/random`);
+    }
 
-  public getTenJokesByType(type: JokeType): Promise<ApiResponse<JokeDto[]>> {
-    return this.http.get<JokeDto[]>(`/jokes/${type}/ten`);
-  }
+    public getTenJokesByType(type: JokeType): Promise<ApiResponse<JokeDto[]>> {
+        return this.http.get<JokeDto[]>(`/jokes/${type}/ten`);
+    }
 
-  public getJokeById(id: number): Promise<ApiResponse<JokeDto | ApiErrorDto>> {
-    return this.http.get<JokeDto | ApiErrorDto>(`/jokes/${id}`);
-  }
+    public getJokeById(id: number): Promise<ApiResponse<JokeDto | ApiErrorDto>> {
+        return this.http.get<JokeDto | ApiErrorDto>(`/jokes/${id}`);
+    }
 }
