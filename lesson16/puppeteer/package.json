@@ -1,0 +1,30 @@
+{
+    "name": "lesson16-puppeteer",
+    "version": "1.0.0",
+    "description": "Puppeteer tests for homework 15 selectors and actions",
+    "license": "ISC",
+    "author": "Alex",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "test": "vitest run",
+        "test:ui": "vitest",
+        "run": "tsc --build && eslint ./src ./tests"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@stylistic/eslint-plugin": "^5.10.0",
+        "@stylistic/eslint-plugin-ts": "^4.4.1",
+        "@types/node": "^25.9.0",
+        "eslint": "^10.4.0",
+        "eslint-plugin-prettier": "^5.5.5",
+        "eslint-plugin-unicorn": "^64.0.0",
+        "globals": "^17.6.0",
+        "prettier": "^3.8.3",
+        "puppeteer": "^25.2.0",
+        "tsx": "^4.22.2",
+        "typescript": "^6.0.3",
+        "typescript-eslint": "^8.59.3",
+        "vitest": "^4.1.7"
+    }
+}

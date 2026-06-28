@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8">
+    <title>Homework 15 Shop</title>
+    <link rel="icon" href="data:,">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            color: #222;
+        }
+
+        header {
+            align-items: center;
+            background: #f3f5f7;
+            display: flex;
+            gap: 16px;
+            padding: 16px 24px;
+        }
+
+        button,
+        input,
+        a {
+            font-size: 16px;
+        }
+
+        main {
+            padding: 24px;
+        }
+
+        rz-catalog-tile {
+            border: 1px solid #d8dee4;
+            display: block;
+            margin-top: 16px;
+            max-width: 360px;
+            padding: 16px;
+        }
+
+        rz-shopping-cart {
+            background: #fff;
+            border-left: 1px solid #d8dee4;
+            bottom: 0;
+            box-shadow: -8px 0 20px rgb(0 0 0 / 10%);
+            padding: 24px;
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 360px;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        .menu-list-wrap {
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <button data-testid="fat_menu_btn" type="button">&#1050;&#1072;&#1090;&#1072;&#1083;&#1086;&#1075;</button>
+        <nav id="catalog" hidden>
+            <a data-testid="fat_menu_category_link" href="/ua/computers-notebooks/c80253/">
+                &#1053;&#1086;&#1091;&#1090;&#1073;&#1091;&#1082;&#1080; &#1090;&#1072; &#1082;&#1086;&#1084;&#1087;'&#1102;&#1090;&#1077;&#1088;&#1080;
+            </a>
+        </nav>
+        <form id="search-form">
+            <input data-testid="search-suggest-input" type="search" aria-label="Search">
+            <button data-testid="search-suggest-submit" type="submit">&#1047;&#1085;&#1072;&#1081;&#1090;&#1080;</button>
+        </form>
+        <button data-testid="header-cart-btn" type="button">&#1050;&#1086;&#1096;&#1080;&#1082; <span id="cart-count">0</span></button>
+    </header>
+
+    <main>
+        <h1>&#1053;&#1086;&#1091;&#1090;&#1073;&#1091;&#1082;&#1080;</h1>
+        <section>
+            <rz-catalog-tile>
+                <h2>Notebook Lenovo IdeaPad 15</h2>
+                <button class="buy-button" type="button" aria-label="&#1050;&#1091;&#1087;&#1080;&#1090;&#1080;">
+                    &#1050;&#1091;&#1087;&#1080;&#1090;&#1080;
+                </button>
+            </rz-catalog-tile>
+        </section>
+    </main>
+
+    <rz-shopping-cart hidden>
+        <h2>&#1050;&#1086;&#1096;&#1080;&#1082;</h2>
+        <ul>
+            <li class="cart-list__item" hidden>
+                <div class="cart-product__body">
+                    <span class="cart-product__title">Notebook Lenovo IdeaPad 15</span>
+                    <button id="cartProductActions0" type="button">...</button>
+                    <div class="menu-list-wrap" id="cartProductActions0" hidden>
+                        <button class="button--link" type="button">&#1042;&#1080;&#1076;&#1072;&#1083;&#1080;&#1090;&#1080;</button>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <div data-testid="empty-cart">&#1050;&#1086;&#1096;&#1080;&#1082; &#1087;&#1086;&#1088;&#1086;&#1078;&#1085;&#1110;&#1081;</div>
+    </rz-shopping-cart>
+
+    <script>
+        const catalogButton = document.querySelector('[data-testid="fat_menu_btn"]');
+        const catalog = document.querySelector('#catalog');
+        const searchForm = document.querySelector('#search-form');
+        const searchInput = document.querySelector('[data-testid="search-suggest-input"]');
+        const buyButton = document.querySelector('.buy-button');
+        const cartButton = document.querySelector('[data-testid="header-cart-btn"]');
+        const cart = document.querySelector('rz-shopping-cart');
+        const cartItem = document.querySelector('.cart-list__item');
+        const cartCount = document.querySelector('#cart-count');
+        const cartActionsButton = document.querySelector('#cartProductActions0');
+        const cartActionsMenu = document.querySelector('div.menu-list-wrap#cartProductActions0');
+        const deleteButton = document.querySelector('div.menu-list-wrap#cartProductActions0 button.button--link');
+        const emptyCart = document.querySelector('[data-testid="empty-cart"]');
+
+        catalogButton.addEventListener('click', () => {
+            catalog.hidden = false;
+        });
+
+        catalog.addEventListener('click', (event) => {
+            event.preventDefault();
+            window.history.pushState({}, '', '/ua/computers-notebooks/c80253/');
+        });
+
+        searchForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const query = searchInput.value.trim();
+            window.history.pushState({}, '', `/ua/search/?text=${encodeURIComponent(query)}`);
+        });
+
+        buyButton.addEventListener('click', () => {
+            cartItem.hidden = false;
+            emptyCart.hidden = true;
+            cartCount.textContent = '1';
+        });
+
+        cartButton.addEventListener('click', () => {
+            cart.hidden = false;
+        });
+
+        cartActionsButton.addEventListener('click', () => {
+            cartActionsMenu.hidden = false;
+        });
+
+        deleteButton.addEventListener('click', () => {
+            cartItem.hidden = true;
+            emptyCart.hidden = false;
+            cartCount.textContent = '0';
+        });
+    </script>
+</body>
+</html>
