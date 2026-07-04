@@ -1,6 +1,6 @@
 // cSpell:ignore Deye EcoFlow hotline
 import puppeteer, { Browser, BrowserContext, Page } from 'puppeteer';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, test } from 'vitest';
 import { PriceComparisonPage } from '../../src/modules/hotline/price-comparison.page';
 
 describe('Live hotline.ua search scenarios', () => {
@@ -35,21 +35,9 @@ describe('Live hotline.ua search scenarios', () => {
         await browser.close();
     });
 
-    test('searches EcoFlow products with Puppeteer commands', async () => {
-        await page.locator('[aria-controls="autosuggest-autosuggest__results"]').fill('EcoFlow');
-        await page.keyboard.press('Enter');
-        await page.waitForFunction(() => window.location.pathname.includes('/sr/'));
-        await page.waitForSelector('div.list-item a.item-title', { visible: true });
-
-        const titles = await page.$$eval('div.list-item a.item-title', (elements) =>
-            elements.slice(0, 10).map((element) => element.textContent?.trim() ?? '')
-        );
-
-        expect(titles.length).toBeGreaterThan(0);
-
-        for (const title of titles) {
-            expect(title).toContain('EcoFlow');
-        }
+    test('searches EcoFlow products using page object', async () => {
+        await priceComparisonPage.search('EcoFlow');
+        await priceComparisonPage.expectSearchResultsFor('EcoFlow');
     });
 
     test('searches Deye products using page object', async () => {

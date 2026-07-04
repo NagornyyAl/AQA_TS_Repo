@@ -10,15 +10,9 @@ describe('Live hotline.ua search scenarios', () => {
         priceComparisonPage.goTo();
     });
 
-    it('searches EcoFlow products with Cypress commands', () => {
-        cy.get('[aria-controls="autosuggest-autosuggest__results"]').type('EcoFlow{enter}');
-        cy.location('pathname', { timeout: 20000 }).should('include', '/sr/');
-        cy.get('div.list-item a.item-title', { timeout: 20000 }).first().should('contain.text', 'EcoFlow');
-        cy.get('div.list-item a.item-title').each(($element, index) => {
-            if (index < 10) {
-                cy.wrap($element).should('contain.text', 'EcoFlow');
-            }
-        });
+    it('searches EcoFlow products using page object', () => {
+        priceComparisonPage.search('EcoFlow');
+        priceComparisonPage.expectSearchResultsFor('EcoFlow');
     });
 
     it('searches Deye products using page object', () => {
