@@ -1,0 +1,32 @@
+{
+    "name": "lesson",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "test": "cypress run",
+        "run": "tsc --build && eslint ./src ./cypress ./cypress.config.ts",
+        "start": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" ./src/index.ts",
+        "cy:open": "cypress open",
+        "cy:run": "cypress run"
+    },
+    "author": "Alex",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+        "@eslint/js": "^9.39.4",
+        "@stylistic/eslint-plugin": "^5.10.0",
+        "@stylistic/eslint-plugin-ts": "^4.4.1",
+        "@types/node": "^25.9.0",
+        "@typescript-eslint/eslint-plugin": "^8.59.3",
+        "cypress": "^15.17.0",
+        "eslint": "^9.39.4",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.5",
+        "eslint-plugin-unicorn": "^61.0.2",
+        "globals": "^16.4.0",
+        "prettier": "^3.6.2",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.59.3"
+    }
+}

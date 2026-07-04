@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.vscode/
+.idea/
+build/
+cypress/screenshots/
+cypress/videos/
