@@ -1,10 +1,8 @@
-import { readFileSync } from 'node:fs';
 import { ElementHandle, Page } from 'puppeteer';
 import { expect } from 'vitest';
 
 export class RozetkaHomeworkPage {
-    private readonly baseUrl = 'http://rozetka-homework15.local';
-    private readonly fixtureHtml = readFileSync(new URL('../../../fixtures/rozetka/rozetka-homework15.html', import.meta.url), 'utf8');
+    private readonly baseUrl = 'https://rozetka.com.ua';
     private readonly notebooksTitle = '\u041d\u043e\u0443\u0442\u0431\u0443\u043a\u0438';
     private readonly buyLabel = '\u041a\u0443\u043f\u0438\u0442\u0438';
     private readonly deleteLabel = '\u0412\u0438\u0434\u0430\u043b\u0438\u0442\u0438';
@@ -23,18 +21,15 @@ export class RozetkaHomeworkPage {
     private readonly cartProductActionsSelector = 'button#cartProductActions0';
     private readonly cartDeleteButtonSelector = 'div.menu-list-wrap#cartProductActions0 button.button--link';
     private readonly emptyCartSelector = 'div[data-testid="empty-cart"]';
-    private routesInstalled = false;
 
     public constructor(private readonly page: Page) {}
 
     public async goToHome(): Promise<void> {
-        await this.mockRozetkaPages();
         await this.page.goto(`${this.baseUrl}/ua/`, { waitUntil: 'domcontentloaded' });
         await this.page.waitForSelector(this.searchInputSelector, { visible: true });
     }
 
     public async goToNotebooksCategory(): Promise<void> {
-        await this.mockRozetkaPages();
         await this.page.goto(`${this.baseUrl}/ua/notebooks/c80004/`, { waitUntil: 'domcontentloaded' });
         await this.page.waitForSelector(this.firstNotebookTileSelector, { visible: true });
         const title = await this.page.$eval('h1', (element) => element.textContent?.trim() ?? '');
@@ -115,26 +110,5 @@ export class RozetkaHomeworkPage {
         }
 
         return element;
-    }
-
-    private async mockRozetkaPages(): Promise<void> {
-        if (this.routesInstalled) {
-            return;
-        }
-
-        this.routesInstalled = true;
-        await this.page.setRequestInterception(true);
-        this.page.on('request', (request) => {
-            if (request.url().startsWith(this.baseUrl)) {
-                request.respond({
-                    status: 200,
-                    contentType: 'text/html; charset=utf-8',
-                    body: this.fixtureHtml
-                });
-                return;
-            }
-
-            request.continue();
-        });
     }
 }
