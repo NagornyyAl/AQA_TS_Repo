@@ -1,8 +1,6 @@
 // cSpell:ignore Deye EcoFlow hotline
-import { expect } from 'chai';
-import { $, browser } from '@wdio/globals';
+import { browser } from '@wdio/globals';
 import { PriceComparisonPage } from '../pageobjects/price-comparison.page';
-import { hotlineSelectors } from '../pageobjects/hotline.selectors';
 
 describe('Live hotline.ua search scenarios with WebDriverIO', () => {
     let priceComparisonPage: PriceComparisonPage;
@@ -13,20 +11,9 @@ describe('Live hotline.ua search scenarios with WebDriverIO', () => {
         await priceComparisonPage.goTo();
     });
 
-    it('searches EcoFlow products with WebDriverIO commands', async () => {
-        const searchInput = await $(hotlineSelectors.searchInput);
-
-        await searchInput.setValue('EcoFlow');
-        await browser.keys('Enter');
-        await priceComparisonPage.waitForSearchResults();
-
-        const titles = await priceComparisonPage.getTopResultTitles();
-
-        expect(titles.length).to.be.greaterThan(0);
-
-        for (const title of titles) {
-            expect(title).to.contain('EcoFlow');
-        }
+    it('searches EcoFlow products using page object', async () => {
+        await priceComparisonPage.search('EcoFlow');
+        await priceComparisonPage.expectSearchResultsFor('EcoFlow');
     });
 
     it('searches Deye products using page object', async () => {

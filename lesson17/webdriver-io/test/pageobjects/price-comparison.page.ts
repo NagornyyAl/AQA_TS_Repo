@@ -1,21 +1,24 @@
 // cSpell:ignore autosuggest Deye EcoFlow hotline
 import { expect } from 'chai';
 import { $, $$, browser } from '@wdio/globals';
-import { hotlineSelectors } from './hotline.selectors';
 
 export class PriceComparisonPage {
     private readonly pageUrl = 'https://hotline.ua/';
     private readonly timeout = 30000;
+    private readonly selectors = {
+        searchInput: '[aria-controls="autosuggest-autosuggest__results"]',
+        resultTitle: 'div.list-item a.item-title'
+    } as const;
 
     public async goTo(): Promise<void> {
         await browser.url(this.pageUrl);
-        const searchInput = await $(hotlineSelectors.searchInput);
+        const searchInput = await $(this.selectors.searchInput);
 
         await searchInput.waitForDisplayed({ timeout: this.timeout });
     }
 
     public async search(query: string): Promise<void> {
-        const searchInput = await $(hotlineSelectors.searchInput);
+        const searchInput = await $(this.selectors.searchInput);
 
         await searchInput.waitForDisplayed({ timeout: this.timeout });
         await searchInput.clearValue();
@@ -53,7 +56,7 @@ export class PriceComparisonPage {
     public async getTopResultTitles(limit = 10): Promise<string[]> {
         await this.waitForSearchResults();
 
-        const elements = await $$(hotlineSelectors.resultTitle).getElements();
+        const elements = await $$(this.selectors.resultTitle).getElements();
         const titles: string[] = [];
 
         for (const element of elements.slice(0, limit)) {
@@ -69,14 +72,14 @@ export class PriceComparisonPage {
             timeoutMsg: 'Expected Hotline search URL to contain /sr/.'
         });
 
-        const firstResultTitle = await $(hotlineSelectors.resultTitle);
+        const firstResultTitle = await $(this.selectors.resultTitle);
         await firstResultTitle.waitForDisplayed({ timeout: this.timeout });
     }
 
     private async getTopResultHrefs(limit = 10): Promise<string[]> {
         await this.waitForSearchResults();
 
-        const links = await $$(hotlineSelectors.resultTitle).getElements();
+        const links = await $$(this.selectors.resultTitle).getElements();
         const hrefs: string[] = [];
 
         for (const link of links.slice(0, limit)) {

@@ -1,6 +1,6 @@
 // cSpell:ignore autosuggest Deye EcoFlow hotline
 import { expect } from 'chai';
-import { By, Key, WebDriver } from 'selenium-webdriver';
+import { Key, WebDriver } from 'selenium-webdriver';
 import { waitForVisible } from '../../support/browser';
 import { hotlineSelectors } from './hotline.selectors';
 
@@ -12,11 +12,11 @@ export class PriceComparisonPage {
 
     public async goTo(): Promise<void> {
         await this.driver.get(this.pageUrl);
-        await waitForVisible(this.driver, By.css(hotlineSelectors.searchInput), this.timeout);
+        await waitForVisible(this.driver, hotlineSelectors.searchInput, this.timeout);
     }
 
     public async search(query: string): Promise<void> {
-        const searchInput = await waitForVisible(this.driver, By.css(hotlineSelectors.searchInput), this.timeout);
+        const searchInput = await waitForVisible(this.driver, hotlineSelectors.searchInput, this.timeout);
 
         await searchInput.clear();
         await searchInput.sendKeys(query, Key.ENTER);
@@ -50,9 +50,9 @@ export class PriceComparisonPage {
     }
 
     public async getTopResultTitles(limit = 10): Promise<string[]> {
-        await waitForVisible(this.driver, By.css(hotlineSelectors.resultTitle), this.timeout);
+        await waitForVisible(this.driver, hotlineSelectors.resultTitle, this.timeout);
 
-        const elements = await this.driver.findElements(By.css(hotlineSelectors.resultTitle));
+        const elements = await this.driver.findElements(hotlineSelectors.resultTitle);
         const titles: string[] = [];
 
         for (const element of elements.slice(0, limit)) {
@@ -64,13 +64,13 @@ export class PriceComparisonPage {
 
     public async waitForSearchResults(): Promise<void> {
         await this.driver.wait(async () => (await this.driver.getCurrentUrl()).includes('/sr/'), this.timeout);
-        await waitForVisible(this.driver, By.css(hotlineSelectors.resultTitle), this.timeout);
+        await waitForVisible(this.driver, hotlineSelectors.resultTitle, this.timeout);
     }
 
     private async getTopResultHrefs(limit = 10): Promise<string[]> {
-        await waitForVisible(this.driver, By.css(hotlineSelectors.resultTitle), this.timeout);
+        await waitForVisible(this.driver, hotlineSelectors.resultTitle, this.timeout);
 
-        const links = await this.driver.findElements(By.css(hotlineSelectors.resultTitle));
+        const links = await this.driver.findElements(hotlineSelectors.resultTitle);
         const hrefs: string[] = [];
 
         for (const link of links.slice(0, limit)) {

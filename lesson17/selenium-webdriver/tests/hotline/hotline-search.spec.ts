@@ -1,9 +1,7 @@
 // cSpell:ignore Deye EcoFlow hotline
-import { expect } from 'chai';
-import { By, Key, WebDriver } from 'selenium-webdriver';
+import { WebDriver } from 'selenium-webdriver';
 import { PriceComparisonPage } from '../../src/modules/hotline/price-comparison.page';
-import { hotlineSelectors } from '../../src/modules/hotline/hotline.selectors';
-import { closeDriver, createDriver, waitForVisible } from '../../src/support/browser';
+import { closeDriver, createDriver } from '../../src/support/browser';
 
 describe('Live hotline.ua search scenarios with Selenium WebDriver', function () {
     this.timeout(90000);
@@ -21,19 +19,9 @@ describe('Live hotline.ua search scenarios with Selenium WebDriver', function ()
         await closeDriver(driver);
     });
 
-    it('searches EcoFlow products with Selenium WebDriver commands', async () => {
-        const searchInput = await waitForVisible(driver, By.css(hotlineSelectors.searchInput));
-
-        await searchInput.sendKeys('EcoFlow', Key.ENTER);
-        await priceComparisonPage.waitForSearchResults();
-
-        const titles = await priceComparisonPage.getTopResultTitles();
-
-        expect(titles.length).to.be.greaterThan(0);
-
-        for (const title of titles) {
-            expect(title).to.contain('EcoFlow');
-        }
+    it('searches EcoFlow products using page object', async () => {
+        await priceComparisonPage.search('EcoFlow');
+        await priceComparisonPage.expectSearchResultsFor('EcoFlow');
     });
 
     it('searches Deye products using page object', async () => {
