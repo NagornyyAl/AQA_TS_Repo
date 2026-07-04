@@ -1,0 +1,33 @@
+{
+    "name": "lesson17-hotline-selenium-webdriver",
+    "version": "1.0.0",
+    "description": "Hotline.ua Page Object tests with Mocha, Chai and Selenium WebDriver",
+    "license": "ISC",
+    "author": "",
+    "type": "module",
+    "scripts": {
+        "test": "mocha",
+        "check": "tsc --noEmit",
+        "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
+        "lint:fix": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --fix",
+        "format": "prettier --write \"{src,tests}/**/*.ts\" \"*.json\" \"*.md\""
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.0",
+        "@stylistic/eslint-plugin": "^5.0.0",
+        "@types/chai": "^5.0.0",
+        "@types/mocha": "^10.0.0",
+        "@types/node": "^22.0.0",
+        "@types/selenium-webdriver": "^4.0.0",
+        "chai": "^5.0.0",
+        "eslint": "^10.0.0",
+        "eslint-plugin-unicorn": "^68.0.0",
+        "globals": "^16.0.0",
+        "mocha": "^11.0.0",
+        "prettier": "^3.0.0",
+        "selenium-webdriver": "^4.0.0",
+        "tsx": "^4.0.0",
+        "typescript": "^5.0.0",
+        "typescript-eslint": "^8.0.0"
+    }
+}
