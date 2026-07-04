@@ -1,15 +1,11 @@
-import { test, expect } from '@playwright/test';
-import { HotlineHomePage } from '../src/pages';
+import { expect, test } from '../src/fixtures';
 
 test.describe('Hotline.ua - Homepage', () => {
-    let homePage: HotlineHomePage;
-
-    test.beforeEach(async ({ page }) => {
-        homePage = new HotlineHomePage(page);
+    test.beforeEach(async ({ homePage }) => {
         await homePage.goto();
     });
 
-    test('should load homepage with all key header elements visible', async ({ page }) => {
+    test('should load homepage with all key header elements visible', async ({ page, homePage }) => {
         await test.step('Verify page URL is the hotline.ua homepage', async () => {
             await expect(page).toHaveURL('https://hotline.ua/');
         });
@@ -23,13 +19,13 @@ test.describe('Hotline.ua - Homepage', () => {
         });
 
         await test.step('Verify catalog button is visible with expected text', async () => {
-            await expect(homePage.catalogButton).toBeVisible();
-            await expect(homePage.catalogButton).toContainText('Каталог');
+            await expect(homePage.catalogMenu.button).toBeVisible();
+            await expect(homePage.catalogMenu.button).toContainText('Каталог');
         });
 
         await test.step('Verify search input is visible with expected placeholder', async () => {
-            await expect(homePage.searchInput).toBeVisible();
-            await expect(homePage.searchInput).toHaveAttribute('placeholder', 'Знайти товар, магазин, бренд');
+            await expect(homePage.searchBox.input).toBeVisible();
+            await expect(homePage.searchBox.input).toHaveAttribute('placeholder', 'Знайти товар, магазин, бренд');
         });
 
         await test.step('Verify city selector shows a non-empty city name', async () => {
