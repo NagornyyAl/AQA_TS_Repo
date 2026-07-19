@@ -1,0 +1,37 @@
+{
+    "name": "lesson20-hotline-bdd",
+    "version": "1.0.0",
+    "description": "Cucumber.js + Playwright BDD tests for hotline.ua (lesson 20)",
+    "license": "ISC",
+    "author": "",
+    "type": "module",
+    "scripts": {
+        "test": "cucumber-js --config cucumber.cjs --profile local",
+        "test:ci": "cucumber-js --config cucumber.cjs --profile ci",
+        "test:debug": "cucumber-js --config cucumber.cjs --profile local --tags @debug",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.39.1",
+        "@stylistic/eslint-plugin": "^5.6.1",
+        "@types/chai": "^5.2.3",
+        "@types/node": "^24.10.1",
+        "eslint": "^9.39.1",
+        "eslint-plugin-prettier": "^5.5.4",
+        "eslint-plugin-unicorn": "^62.0.0",
+        "globals": "^16.5.0",
+        "prettier": "^3.6.2",
+        "tsx": "^4.19.2",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.47.0"
+    },
+    "dependencies": {
+        "@cucumber/cucumber": "^11.2.0",
+        "@cucumber/pretty-formatter": "^2.0.0",
+        "chai": "^5.1.2",
+        "playwright": "^1.55.0"
+    }
+}

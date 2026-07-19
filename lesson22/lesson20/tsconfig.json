@@ -1,0 +1,19 @@
+{
+    "compileOnSave": false,
+    "include": ["./src/**/*"],
+    "exclude": ["./node_modules/**/*"],
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "lib": ["DOM", "ESNext"],
+        "strict": true,
+        "noImplicitAny": false,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "noEmit": true,
+        "types": ["node"]
+    }
+}

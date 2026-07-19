@@ -1,0 +1,51 @@
+name: Cucumber BDD Tests (lesson20)
+
+on:
+  push:
+    paths:
+      - 'lesson20/**'
+      - '.github/workflows/bdd-lesson20.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lesson20/**'
+      - '.github/workflows/bdd-lesson20.yml'
+  workflow_dispatch:
+
+env:
+  WORKING_DIR: ./lesson20
+
+jobs:
+  test:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: ${{ env.WORKING_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ env.WORKING_DIR }}
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: ${{ env.WORKING_DIR }}
+
+      - name: Run Cucumber BDD tests
+        run: npm run test:ci
+        working-directory: ${{ env.WORKING_DIR }}
+
+      - name: Upload Cucumber reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-report-lesson20
+          path: ${{ env.WORKING_DIR }}/reports
+          retention-days: 14
+          if-no-files-found: ignore

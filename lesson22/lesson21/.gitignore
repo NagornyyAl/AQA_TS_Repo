@@ -1,0 +1,16 @@
+node_modules/
+test-results/
+playwright-report/
+playwright/.cache/
+.auth/
+
+# Allure
+allure-results/
+allure-report/
+.allure/
+
+# Mochawesome
+mochawesome-report/
+
+# env
+.env
