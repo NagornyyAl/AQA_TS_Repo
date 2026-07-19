@@ -1,0 +1,47 @@
+name: WebdriverIO Tests (lesson17)
+
+on:
+  push:
+    paths:
+      - 'lesson17/webdriver-io/**'
+      - '.github/workflows/wdio-lesson17.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lesson17/webdriver-io/**'
+      - '.github/workflows/wdio-lesson17.yml'
+  workflow_dispatch:
+
+env:
+  WORKING_DIR: ./lesson17/webdriver-io
+
+jobs:
+  test:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: ${{ env.WORKING_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ env.WORKING_DIR }}
+
+      - name: Run WebdriverIO tests
+        run: npm test
+        working-directory: ${{ env.WORKING_DIR }}
+
+      - name: Upload test reports (JUnit + screenshots)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: wdio-reports
+          path: ${{ env.WORKING_DIR }}/reports
+          retention-days: 14
+          if-no-files-found: ignore
