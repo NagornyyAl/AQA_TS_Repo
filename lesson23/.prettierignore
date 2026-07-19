@@ -1,0 +1,6 @@
+node_modules/
+playwright-report/
+test-results/
+
+# kept byte-identical to the official ReportPortal repo
+docker-compose.reportportal.yml

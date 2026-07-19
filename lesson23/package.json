@@ -1,0 +1,31 @@
+{
+    "name": "lesson23-docker-expense-tracker",
+    "version": "1.0.0",
+    "description": "Playwright + TypeScript UI tests for the dockerized Expense Tracker App (lesson 23)",
+    "main": "index.js",
+    "type": "commonjs",
+    "scripts": {
+        "test": "playwright test",
+        "test:headed": "playwright test --headed",
+        "test:debug": "playwright test --debug",
+        "test:report": "playwright show-report",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@eslint/js": "^9.39.1",
+        "@playwright/test": "^1.55.0",
+        "@stylistic/eslint-plugin": "^5.6.1",
+        "@types/node": "^24.10.1",
+        "eslint": "^9.39.1",
+        "eslint-plugin-unicorn": "^62.0.0",
+        "prettier": "^3.6.2",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.47.0"
+    }
+}
