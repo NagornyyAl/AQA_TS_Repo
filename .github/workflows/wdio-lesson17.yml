@@ -3,17 +3,17 @@ name: WebdriverIO Tests (lesson17)
 on:
   push:
     paths:
-      - 'lesson17/webdriver-io/**'
+      - 'lesson22/lesson17/webdriver-io/**'
       - '.github/workflows/wdio-lesson17.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'lesson17/webdriver-io/**'
+      - 'lesson22/lesson17/webdriver-io/**'
       - '.github/workflows/wdio-lesson17.yml'
   workflow_dispatch:
 
 env:
-  WORKING_DIR: ./lesson17/webdriver-io
+  WORKING_DIR: ./lesson22/lesson17/webdriver-io
 
 jobs:
   test:
@@ -41,7 +41,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: wdio-reports
+          name: wdio-reports-lesson17
           path: ${{ env.WORKING_DIR }}/reports
           retention-days: 14
           if-no-files-found: ignore

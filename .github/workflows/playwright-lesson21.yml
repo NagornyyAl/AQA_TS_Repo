@@ -3,17 +3,17 @@ name: Playwright Tests (lesson21)
 on:
   push:
     paths:
-      - 'lesson21/**'
+      - 'lesson22/lesson21/**'
       - '.github/workflows/playwright-lesson21.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'lesson21/**'
+      - 'lesson22/lesson21/**'
       - '.github/workflows/playwright-lesson21.yml'
   workflow_dispatch:
 
 env:
-  WORKING_DIR: ./lesson21
+  WORKING_DIR: ./lesson22/lesson21
 
 jobs:
   test:

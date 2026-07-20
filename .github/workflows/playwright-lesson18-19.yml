@@ -1,19 +1,19 @@
-name: Cucumber BDD Tests (lesson20)
+name: Playwright Tests (lesson18-19)
 
 on:
   push:
     paths:
-      - 'lesson20/**'
-      - '.github/workflows/bdd-lesson20.yml'
+      - 'lesson22/lesson18-19/**'
+      - '.github/workflows/playwright-lesson18-19.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'lesson20/**'
-      - '.github/workflows/bdd-lesson20.yml'
+      - 'lesson22/lesson18-19/**'
+      - '.github/workflows/playwright-lesson18-19.yml'
   workflow_dispatch:
 
 env:
-  WORKING_DIR: ./lesson20
+  WORKING_DIR: ./lesson22/lesson18-19
 
 jobs:
   test:
@@ -37,15 +37,23 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: ${{ env.WORKING_DIR }}
 
-      - name: Run Cucumber BDD tests
-        run: npm run test:ci
+      - name: Run Playwright tests
+        run: npx playwright test
         working-directory: ${{ env.WORKING_DIR }}
 
-      - name: Upload Cucumber reports
+      - name: Upload Playwright HTML report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: cucumber-report-lesson20
-          path: ${{ env.WORKING_DIR }}/reports
+          name: playwright-report-lesson18-19
+          path: ${{ env.WORKING_DIR }}/playwright-report
+          retention-days: 14
+
+      - name: Upload test traces/screenshots on failure
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results-lesson18-19
+          path: ${{ env.WORKING_DIR }}/test-results
           retention-days: 14
           if-no-files-found: ignore
