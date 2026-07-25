@@ -2,6 +2,7 @@ name: Playwright Tests (FinalProject)
 
 on:
   push:
+    branches: [main]
     paths:
       - 'FinalProject/**'
       - '.github/workflows/playwright-finalproject.yml'

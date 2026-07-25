@@ -141,14 +141,15 @@ test.describe('Practice Software Testing current storefront - catalogue UI', () 
                 return catalogPage.getFirstProductId();
             });
 
-            const { productResponse, relatedProductsResponse } = await test.step('When the visitor opens that product', async () => {
-                const responses = await productPage.open(productId);
-                await Promise.all([
-                    reporter.attachApiExchange(`Browser GET /products/${productId}`, responses.productResponse),
-                    reporter.attachApiExchange(`Browser GET /products/${productId}/related`, responses.relatedProductsResponse)
-                ]);
-                return responses;
-            });
+            const { productResponse, relatedProductsResponse } =
+                await test.step('When the visitor opens that product from the catalogue', async () => {
+                    const responses = await productPage.openFromCatalogue(catalogPage.productCard(productId), productId);
+                    await Promise.all([
+                        reporter.attachApiExchange(`Browser GET /products/${productId}`, responses.productResponse),
+                        reporter.attachApiExchange(`Browser GET /products/${productId}/related`, responses.relatedProductsResponse)
+                    ]);
+                    return responses;
+                });
             const product = parseStorefrontProduct(await productResponse.json());
             const relatedProducts = parseStorefrontRelatedProducts(await relatedProductsResponse.json());
 
@@ -175,7 +176,7 @@ test.describe('Practice Software Testing current storefront - catalogue UI', () 
             const productId = await test.step('Given an available product is discovered dynamically and opened', async () => {
                 await catalogPage.open();
                 const id = await catalogPage.getFirstProductId();
-                await productPage.open(id);
+                await productPage.openFromCatalogue(catalogPage.productCard(id), id);
                 await expect(productPage.quantity).toHaveValue('1');
                 return id;
             });

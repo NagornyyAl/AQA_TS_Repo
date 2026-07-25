@@ -31,8 +31,17 @@ export class ProductPage {
         this.increaseQuantityButton = page.getByTestId('increase-quantity');
     }
 
-    public async open(productId: string): Promise<ProductPageLoad> {
-        const responses = await this.openRoute(productId);
+    // Client-side navigation via a catalogue card click: a second full-page
+    // load (page.goto) from CI runner IPs is intercepted by the Cloudflare
+    // bot challenge, while SPA route changes and XHR calls pass through.
+    public async openFromCatalogue(productCard: Locator, productId: string): Promise<ProductPageLoad> {
+        const productResponse = this.waitForStorefrontResponse(`/products/${productId}`);
+        const relatedProductsResponse = this.waitForStorefrontResponse(`/products/${productId}/related`);
+        await productCard.click();
+        const responses = {
+            productResponse: await productResponse,
+            relatedProductsResponse: await relatedProductsResponse
+        };
         await this.name.waitFor({ state: 'visible' });
         return responses;
     }
