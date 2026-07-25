@@ -1,0 +1,27 @@
+services:
+    app:
+        build:
+            context: ./app
+        container_name: expense-tracker-app
+        ports:
+            - '3000:3000'
+        networks:
+            - expense-tracker-net
+
+    tests:
+        build:
+            context: .
+        container_name: expense-tracker-tests
+        depends_on:
+            app:
+                condition: service_healthy
+        environment:
+            APP_BASE_URL: http://app:3000
+        volumes:
+            - ./playwright-report:/usr/src/tests/playwright-report
+            - ./test-results:/usr/src/tests/test-results
+        networks:
+            - expense-tracker-net
+
+networks:
+    expense-tracker-net:
