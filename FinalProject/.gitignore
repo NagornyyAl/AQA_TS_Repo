@@ -1,0 +1,12 @@
+node_modules/
+playwright-report/
+playwright-report-with-bugs/
+test-results/
+test-results-with-bugs/
+blob-report/
+allure-results/
+allure-results-with-bugs/
+allure-report/
+allure-report-with-bugs/
+pacts/
+.env
